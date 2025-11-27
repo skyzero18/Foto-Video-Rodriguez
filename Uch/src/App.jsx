@@ -4,8 +4,8 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import LoginPage from './Components/Login'
-import Mainpage from "./Components/Mainpage/Mainpage";
-
+import Mainpage from "./Components/Mainpage";
+import AdminPanel from "./Components/AdminPage";
 function App() {
 
   return (
@@ -13,6 +13,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Mainpage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/administrativo" element={<AdminPanel />} />
       </Routes>
     </BrowserRouter>
   );
