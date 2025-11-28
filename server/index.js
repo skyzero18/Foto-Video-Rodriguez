@@ -3,7 +3,8 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const productos = require("./routes/productos"); 
 const categoriasRoute = require("./routes/categorias");
-const usuarioRoutes= require("./routes/usuarioRoutes")
+const usuarioRoutes= require("./routes/usuarioRoutes");
+const logsRoutes= require("./routes/logs");
 const app = express();
 
 app.use(cors());
@@ -18,5 +19,6 @@ mongoose.connect("mongodb://localhost:27017/Rodriguez")
 app.use("/productos", productos); // ← RUTA AGREGADA
 app.use("/categorias", categoriasRoute);
 app.use("/usuarios", usuarioRoutes);
+app.use("/logs", logsRoutes);
 
 app.listen(4000, () => console.log("Servidor en http://localhost:4000"));

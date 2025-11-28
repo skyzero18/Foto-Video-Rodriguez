@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import "./mainpage.css";
+import { useNavigate } from "react-router-dom";
 
 function Mainpage() {
   const [categoria, setCategoria] = useState("todas");
@@ -7,7 +8,7 @@ function Mainpage() {
   const [productos, setProductos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const navigate = useNavigate();
   useEffect(() => {
     async function cargarDatos() {
       try {
@@ -73,6 +74,19 @@ function Mainpage() {
           <span>Categorías</span>
           <span>Ofertas</span>
           <span>Moda</span>
+          <button
+            onClick={() => navigate("/admin")}
+            style={{
+              background: "#fff",
+              border: "none",
+              padding: "10px 15px",
+              borderRadius: "5px",
+              cursor: "pointer",
+              fontWeight: "bold"
+            }}
+          >
+            Admin Panel
+          </button>
         </nav>
       </header>
 

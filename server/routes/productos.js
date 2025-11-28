@@ -3,6 +3,7 @@ const Producto = require("../Models/Product");
 const Log = require("../Models/Log");
 const router = express.Router();
 
+// OBTENER TODOS
 router.get("/", async (req, res) => {
   try {
     const productos = await Producto.find();
@@ -12,24 +13,38 @@ router.get("/", async (req, res) => {
   }
 });
 
+// OBTENER POR ID
+router.get("/:id", async (req, res) => {
+  try {
+    const producto = await Producto.findById(req.params.id);
+
+    if (!producto) {
+      return res.status(404).json({ ok: false, error: "Producto no encontrado" });
+    }
+
+    res.json({ ok: true, producto });
+
+  } catch (error) {
+    res.status(500).json({ ok: false, error: error.message });
+  }
+});
 
 // CREAR PRODUCTO + LOG
 router.post("/", async (req, res) => {
   try {
     const nuevo = await Producto.create({
-      Nombre: req.body.nombre,
-      Precio: req.body.precio,
-      Categoria: req.body.categoria,
-      Imagen: req.body.imagen,
-      Descripcion: req.body.descripcion,
+      Nombre: req.body.Nombre || req.body.nombre,
+      Precio: req.body.Precio || req.body.precio,
+      Categoria: req.body.Categoria || req.body.categoria,
+      Imagen: req.body.Imagen || req.body.imagen,
+      Descripcion: req.body.Descripcion || req.body.descripcion,
       Activo: true
     });
 
-    // Log automático
     await Log.create({
       Usuario: "admin",
       Producto: nuevo._id.toString(),
-      Accion: "Producto creado",
+      Accion: `Producto creado: ${nuevo.Nombre}`
     });
 
     res.json({ ok: true, producto: nuevo });
@@ -39,4 +54,65 @@ router.post("/", async (req, res) => {
     res.status(500).json({ ok: false, error: "Error al crear el producto" });
   }
 });
+
+
+// EDITAR PRODUCTO + LOG
+router.put("/:id", async (req, res) => {
+  try {
+    const actualizado = await Producto.findByIdAndUpdate(
+      req.params.id,
+      {
+        Nombre: req.body.Nombre,
+        Precio: req.body.Precio,
+        Categoria: req.body.Categoria, // ← CORREGIDO
+        Activo: req.body.Activo,
+        Imagen: req.body.Imagen,
+        Descripcion: req.body.Descripcion,
+      },
+      { new: true }
+    );
+
+    if (!actualizado) {
+      return res.status(404).json({ ok: false, error: "Producto no encontrado" });
+    }
+
+    // LOG
+    await Log.create({
+      Usuario: "admin",
+      Producto: actualizado._id.toString(),
+      Accion: `Producto editado: ${actualizado.Nombre}`
+    });
+
+    res.json({ ok: true, producto: actualizado });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, error: "Error al editar el producto" });
+  }
+});
+
+// ELIMINAR PRODUCTO + LOG
+router.delete("/:id", async (req, res) => {
+  try {
+    const eliminado = await Producto.findByIdAndDelete(req.params.id);
+
+    if (!eliminado) {
+      return res.status(404).json({ ok: false, error: "Producto no encontrado" });
+    }
+
+    // LOG
+    await Log.create({
+      Usuario: "admin",
+      Producto: eliminado._id.toString(),
+      Accion: `Producto eliminado: ${eliminado.Nombre}`
+    });
+
+    res.json({ ok: true, mensaje: `Producto eliminado: ${eliminado.Nombre}` });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, error: "Error al eliminar el producto" });
+  }
+});
+
 module.exports = router;

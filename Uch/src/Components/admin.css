@@ -1,76 +1,84 @@
-.admin-container {
-  padding: 30px;
-  background: #f5f5f5;
-  min-height: 100vh;
-  font-family: Arial, sans-serif;
+/* ====== VARIABLES GLOBALES ====== */
+:root {
+  --color-fondo: #f4f6f9;
+  --color-card: #ffffff;
+  --color-header: #1a73e8;
+  --color-hover: #1664c4;
+  --color-texto: #333;
+  --color-borde: #d9d9d9;
+  --fuente: 'Inter', sans-serif;
 }
 
-.admin-title {
+/* ====== ESTILO GENERAL ====== */
+body {
+  background: var(--color-fondo);
+  font-family: var(--fuente);
+  color: var(--color-texto);
+}
+
+/* ====== CONTENEDOR PRINCIPAL ====== */
+.admin-panel {
+  max-width: 700px;
+  margin: auto;
+  background: var(--color-card);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* ====== TÍTULO ====== */
+.admin-panel h2 {
+  color: var(--color-header);
+  margin-bottom: 20px;
+  font-weight: 700;
   text-align: center;
-  margin-bottom: 25px;
 }
 
-.admin-box {
-  display: flex;
-  gap: 30px;
-  justify-content: center;
-  align-items: flex-start;
-}
-
-.admin-form, .admin-logs {
-  background: white;
-  padding: 20px;
-  width: 400px;
-  border-radius: 8px;
-  box-shadow: 0px 3px 7px rgba(0,0,0,0.1);
-}
-
-.admin-form h2, .admin-logs h2 {
-  margin-bottom: 15px;
-}
-
-.admin-form label {
-  font-weight: bold;
-  margin-top: 10px;
+/* ====== FORMULARIO ====== */
+.admin-panel label {
+  font-weight: 600;
+  margin-bottom: 5px;
   display: block;
 }
 
-.admin-form input,
-.admin-form select,
-.admin-form textarea {
+.admin-panel input,
+.admin-panel select {
   width: 100%;
   padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  margin-top: 5px;
+  margin-bottom: 12px;
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  font-size: 15px;
+  background: #fff;
+  transition: 0.2s;
 }
 
-.admin-form textarea {
-  height: 100px;
-  resize: vertical;
+.admin-panel input:focus,
+.admin-panel select:focus {
+  outline: none;
+  border-color: var(--color-header);
+  box-shadow: 0 0 4px rgba(26,115,232,0.4);
 }
 
-.admin-form button {
-  margin-top: 15px;
+/* ====== BOTONES ====== */
+.admin-panel button {
   width: 100%;
-  padding: 10px;
-  background: #3483fa;
+  padding: 12px;
+  background: var(--color-header);
+  color: #fff;
   border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  color: white;
+  border-radius: 8px;
   cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: background 0.2s ease;
 }
 
-.admin-form button:hover {
-  background: #2968c8;
+.admin-panel button:hover {
+  background: var(--color-hover);
 }
 
-.admin-logs textarea {
-  width: 100%;
-  height: 320px;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  resize: vertical;
+/* Espaciados extra */
+.mb {
+  margin-bottom: 15px;
 }
