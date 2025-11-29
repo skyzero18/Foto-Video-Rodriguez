@@ -1,0 +1,268 @@
+/* ================================
+   RESET Y VARIABLES
+================================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+body {
+  background: #f5f5f5;
+  color: #222;
+  line-height: 1.5;
+}
+
+:root {
+  --verde: #008332;
+  --verde-oscuro: #005f24;
+  --gris: #e8e8e8;
+  --gris-oscuro: #cfcfcf;
+  --sombra: 0 4px 12px rgba(0,0,0,0.12);
+  --radius: 8px;
+}
+
+/* ================================
+   NAVBAR
+================================= */
+.ml-header {
+  background: var(--verde);
+  padding: 15px 25px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.ml-logo {
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.ml-search {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  border: none;
+}
+
+.ml-nav button {
+  background: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: var(--radius);
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.ml-nav button:hover {
+  background: var(--gris);
+}
+
+/* ================================
+   FILTROS
+================================= */
+.ml-filtros {
+  margin: 20px auto;
+  width: 95%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ml-filtros select {
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  border: 1px solid #ccc;
+}
+
+/* ================================
+   GRILLA DE PRODUCTOS
+================================= */
+.ml-grid {
+  width: 95%;
+  margin: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.ml-card {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--sombra);
+  overflow: hidden;
+  transition: 0.2s;
+  padding-bottom: 10px;
+}
+.ml-card:hover {
+  transform: translateY(-3px);
+}
+
+.ml-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+/* STOCK y CONTROLES */
+.ml-card-stock button {
+  background: var(--verde);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.ml-card-stock button:hover {
+  background: var(--verde-oscuro);
+}
+
+.ml-card-stock input {
+  width: 50px;
+  padding: 5px;
+  text-align: center;
+}
+
+/* INFO DEL PRODUCTO */
+.ml-card-info {
+  padding: 12px;
+}
+
+.ml-card-info h3 {
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+.ml-card-info p {
+  font-size: 14px;
+  color: #444;
+  margin-bottom: 5px;
+}
+.ml-category {
+  display: inline-block;
+  background: var(--gris);
+  padding: 4px 8px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.ml-price {
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--verde);
+}
+
+/* ================================
+   LOGIN PAGE
+================================= */
+.login-container {
+  width: 100%;
+  max-width: 450px;
+  margin: 40px auto;
+  background: white;
+  padding: 25px;
+  border-radius: var(--radius);
+  box-shadow: var(--sombra);
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.form-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-box input {
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  border: 1px solid #ccc;
+}
+
+.form-box button {
+  background: var(--verde);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: var(--radius);
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 8px;
+}
+.form-box button:hover {
+  background: var(--verde-oscuro);
+}
+
+/* ================================
+   PANEL ADMIN
+================================= */
+.admin-panel select,
+.admin-panel input {
+  padding: 9px 12px;
+  border: 1px solid #ccc;
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+}
+
+.admin-panel button {
+  background: var(--verde);
+  color: white;
+  padding: 10px 14px;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.admin-panel button:hover {
+  background: var(--verde-oscuro);
+}
+
+/* Contenedores */
+.admin-panel {
+  width: 95%;
+  max-width: 1000px;
+  margin: auto;
+  background: white;
+  padding: 25px;
+  border-radius: var(--radius);
+  box-shadow: var(--sombra);
+}
+
+/* LOGS */
+.logs-box {
+  background: #f3f3f3;
+  padding: 15px;
+  border-radius: var(--radius);
+  border: 1px solid #ccc;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.logs-box div {
+  background: white;
+  border: 1px solid #ddd;
+  padding: 8px;
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+}
+
+/* ================================
+   RESPONSIVE
+================================= */
+
+@media (max-width: 700px) {
+  .ml-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .login-container {
+    width: 90%;
+  }
+  .admin-panel {
+    width: 95%;
+    padding: 15px;
+  }
+}

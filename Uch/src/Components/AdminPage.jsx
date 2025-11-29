@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "../Components/admin.css";
+
 import { useParams } from "react-router-dom";
 
 function AdminPanel() {

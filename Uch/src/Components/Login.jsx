@@ -1,10 +1,12 @@
 import { useState } from "react";
 import "./Login.css";
+
 function LoginPage() {
   const [form, setForm] = useState({
     Nombre: "",
     Correo: "",
     contraseña: "",
+    claveRegistro: "",   // <-- 🔐 CLAVE MAESTRA
   });
 
   const [loginForm, setLoginForm] = useState({
@@ -70,7 +72,6 @@ function LoginPage() {
 
       alert("Login exitoso. Bienvenido " + data.usuario.Nombre);
 
-      // Si querés guardar sesión:
       localStorage.setItem("usuario", JSON.stringify(data.usuario));
 
     } catch (error) {
@@ -108,6 +109,15 @@ function LoginPage() {
           placeholder="Contraseña"
           name="contraseña"
           value={form.contraseña}
+          onChange={handleChange}
+        />
+
+        {/* 🔐 NUEVO CAMPO: CLAVE MAESTRA */}
+        <input
+          type="password"
+          placeholder="Clave de registro"
+          name="claveRegistro"
+          value={form.claveRegistro}
           onChange={handleChange}
         />
 

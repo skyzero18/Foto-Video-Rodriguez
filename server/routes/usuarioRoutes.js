@@ -4,16 +4,22 @@ const bcrypt = require("bcryptjs");
 
 const router = express.Router();
 
-
 // -----------------------------------------------
-// 📌 REGISTRO DE USUARIO
+// 📌 REGISTRO DE USUARIO (con clave maestra)
 // -----------------------------------------------
 router.post("/", async (req, res) => {
   try {
-    const { Nombre, Correo, contraseña } = req.body;
+    const { Nombre, Correo, contraseña, claveRegistro } = req.body;
 
-    if (!Nombre || !Correo || !contraseña) {
+    if (!Nombre || !Correo || !contraseña || !claveRegistro) {
       return res.status(400).json({ mensaje: "Faltan datos obligatorios" });
+    }
+
+    // 🔐 Clave maestra requerida para registrarse
+    const CLAVE_MAESTRA = "pruebas";
+
+    if (claveRegistro !== CLAVE_MAESTRA) {
+      return res.status(403).json({ mensaje: "Clave de registro incorrecta" });
     }
 
     // Verificar duplicado
@@ -39,7 +45,6 @@ router.post("/", async (req, res) => {
     return res.status(500).json({ error: "Error al crear usuario" });
   }
 });
-
 
 
 // -----------------------------------------------
