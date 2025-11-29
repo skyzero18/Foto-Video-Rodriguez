@@ -22,6 +22,33 @@ function AdminPanel() {
   });
 
   const [nuevoNombreCategoria, setNuevoNombreCategoria] = useState("");
+const [factura, setFactura] = useState({
+  nombre: "",
+  direccion: "",
+  metodoPago: "",
+  productoId: "",
+  monto: ""
+});
+
+const crearFactura = async () => {
+  const res = await fetch("http://localhost:4000/facturas", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      "Nombre y apellido": factura.nombre,
+      "Direccion": factura.direccion,
+      "Metodo de pago": factura.metodoPago,
+      "productoId": factura.productoId,
+      "Monto": factura.monto
+    })
+  });
+
+  const data = await res.json();
+
+  if (data.error) return alert(data.error);
+
+  alert("Factura generada correctamente");
+};
 
   // ----------------------------
   // Cargar datos iniciales
@@ -308,6 +335,56 @@ function AdminPanel() {
 
 
 
+{/* ===================================================== */}
+{/* ===================== FACTURAS ======================= */}
+{/* ===================================================== */}
+
+<hr style={{ marginTop: "40px", marginBottom: "20px" }} />
+
+<h2>Generar Factura</h2>
+
+<div
+  style={{
+    background: "#f3f3f3",
+    padding: "15px",
+    borderRadius: "8px",
+    border: "1px solid #ccc",
+    marginBottom: "20px"
+  }}
+>
+  <input
+    type="text"
+    placeholder="Nombre y apellido"
+    onChange={(e) => setFactura({ ...factura, nombre: e.target.value })}
+  />
+
+  <input
+    type="text"
+    placeholder="Dirección"
+    onChange={(e) => setFactura({ ...factura, direccion: e.target.value })}
+  />
+
+  <input
+    type="text"
+    placeholder="Método de pago"
+    onChange={(e) => setFactura({ ...factura, metodoPago: e.target.value })}
+  />
+
+  <input
+    type="text"
+    placeholder="ID del producto"
+    onChange={(e) => setFactura({ ...factura, productoId: e.target.value })}
+  />
+
+  <input
+    type="number"
+    placeholder="Monto"
+    onChange={(e) => setFactura({ ...factura, monto: e.target.value })}
+  />
+
+  <br />
+  <button onClick={crearFactura}>Generar Factura</button>
+</div>
 
 
 
