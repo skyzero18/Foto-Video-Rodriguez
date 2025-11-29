@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import "../Components/admin.css";
+import { useParams } from "react-router-dom";
 
 function AdminPanel() {
   const [accion, setAccion] = useState("crear");
   const [entidad, setEntidad] = useState("producto");
+  const { id } = useParams();
 
   const [categorias, setCategorias] = useState([]);
   const [productos, setProductos] = useState([]);
@@ -34,12 +36,33 @@ function AdminPanel() {
     const res = await fetch("http://localhost:4000/productos");
     const data = await res.json();
     setProductos(data);
+    return data; // 👈 AGREGAR ESTO
   };
 
+
   useEffect(() => {
-    cargarCategorias();
-    cargarProductos();
-  }, []);
+  cargarCategorias();
+  cargarProductos().then((dataProductos) => {
+    if (id) {
+      setAccion("editar");
+      setEntidad("producto");
+      setProductoId(id);
+
+      const producto = dataProductos.find(p => p._id === id);
+      if (producto) {
+        setForm({
+          Nombre: producto.Nombre,
+          Descripcion: producto.Descripcion,
+          Precio: producto.Precio,
+          Categoria: producto.Categoria,
+          Imagen: producto.Imagen
+        });
+      }
+    }
+  });
+  cargarLogs(1);
+}, []);
+
 
   // ----------------------------
   // Manejar inputs
@@ -52,7 +75,6 @@ function AdminPanel() {
   // ==================== PRODUCTOS =============================
   // ============================================================
 
-  // CREAR PRODUCTO
   const agregarProducto = async () => {
     await fetch("http://localhost:4000/productos", {
       method: "POST",
@@ -70,7 +92,6 @@ function AdminPanel() {
     cargarProductos();
   };
 
-  // EDITAR PRODUCTO
   const editarProducto = async () => {
     if (!productoId) return alert("Seleccione un producto");
 
@@ -84,7 +105,6 @@ function AdminPanel() {
     cargarProductos();
   };
 
-  // ELIMINAR PRODUCTO (Set Activo = false)
   const desactivarProducto = async () => {
     if (!productoId) return alert("Seleccione un producto");
 
@@ -99,10 +119,9 @@ function AdminPanel() {
   };
 
   // ============================================================
-  // ==================== CATEGORÍAS =============================
+  // ==================== CATEGORÍAS ============================
   // ============================================================
 
-  // CREAR CATEGORÍA
   const crearCategoria = async () => {
     if (!nuevoNombreCategoria) return alert("Ingrese un nombre");
 
@@ -117,7 +136,6 @@ function AdminPanel() {
     cargarCategorias();
   };
 
-  // EDITAR CATEGORÍA
   const editarCategoria = async () => {
     if (!categoriaId) return alert("Seleccione una categoría");
     if (!nuevoNombreCategoria) return alert("Ingrese nuevo nombre");
@@ -133,7 +151,6 @@ function AdminPanel() {
     cargarCategorias();
   };
 
-  // ELIMINAR CATEGORÍA (Set Activo = false)
   const borrarCategoria = async () => {
     if (!categoriaId) return alert("Seleccione una categoría");
 
@@ -147,14 +164,35 @@ function AdminPanel() {
   };
 
   // ============================================================
-  // ==================== RENDER ================================
+  // ====================== LOGS ================================
+  // ============================================================
+
+  const [logs, setLogs] = useState([]);
+  const [pagina, setPagina] = useState(1);
+  const [totalPaginas, setTotalPaginas] = useState(1);
+
+  const cargarLogs = async (page = 1) => {
+    try {
+      const res = await fetch(`http://localhost:4000/logs?page=${page}&limit=10`);
+      const data = await res.json();
+
+      setLogs(data.logs);
+      setTotalPaginas(data.totalPages);
+      setPagina(page);
+    } catch (err) {
+      console.error("Error cargando logs:", err);
+    }
+  };
+
+  // ============================================================
+  // ====================== RENDER ==============================
   // ============================================================
 
   return (
     <div style={{ padding: "20px" }}>
       <h2>Panel Administrativo</h2>
 
-      {/* COMBO 1 - ACCIÓN */}
+      {/* COMBO ACCION */}
       <label>Acción:</label>
       <select value={accion} onChange={(e) => setAccion(e.target.value)}>
         <option value="crear">Crear</option>
@@ -164,7 +202,7 @@ function AdminPanel() {
 
       <br /><br />
 
-      {/* COMBO 2 - ENTIDAD */}
+      {/* COMBO ENTIDAD */}
       <label>Entidad:</label>
       <select value={entidad} onChange={(e) => setEntidad(e.target.value)}>
         <option value="producto">Producto</option>
@@ -179,7 +217,6 @@ function AdminPanel() {
 
       {entidad === "categoria" && (
         <div>
-          {/* EDITAR / BORRAR → elegir categoría */}
           {(accion === "editar" || accion === "borrar") && (
             <>
               <label>Seleccionar categoría:</label>
@@ -198,7 +235,6 @@ function AdminPanel() {
             </>
           )}
 
-          {/* SOLO EDITAR o CREAR → pedir nuevo nombre */}
           {(accion === "editar" || accion === "crear") && (
             <div>
               <label>Nombre:</label>
@@ -213,7 +249,6 @@ function AdminPanel() {
 
           <br />
 
-          {/* BOTONES */}
           {accion === "crear" && <button onClick={crearCategoria}>Crear categoría</button>}
           {accion === "editar" && <button onClick={editarCategoria}>Editar categoría</button>}
           {accion === "borrar" && <button onClick={borrarCategoria}>Eliminar categoría</button>}
@@ -226,55 +261,22 @@ function AdminPanel() {
 
       {entidad === "producto" && (
         <div>
-          {/* EDITAR / ELIMINAR → pedir ID */}
-          {(accion === "editar" || accion === "borrar") && (
-            <>
-              <label>Seleccionar producto:</label>
-              <select
-                value={productoId}
-                onChange={(e) => setProductoId(e.target.value)}
-              >
-                <option value="">Seleccione...</option>
-                {productos.map((p) => (
-                  <option key={p._id} value={p._id}>
-                    {p.Nombre}
-                  </option>
-                ))}
-              </select>
-              <br /><br />
-            </>
-          )}
+          
 
-          {/* FORMULARIO DE PRODUCTOS */}
           {(accion === "crear" || accion === "editar") && (
             <div>
               <input
-                name="Nombre"
-                placeholder="Nombre"
-                value={form.Nombre}
-                onChange={actualizarForm}
+                type="text"
+                placeholder="ID del producto"
+                value={productoId}
+                onChange={(e) => setProductoId(e.target.value)}
               />
 
-              <input
-                name="Descripcion"
-                placeholder="Descripción"
-                value={form.Descripcion}
-                onChange={actualizarForm}
-              />
+              <input name="Nombre" placeholder="Nombre" value={form.Nombre} onChange={actualizarForm} />
+              <input name="Descripcion" placeholder="Descripción" value={form.Descripcion} onChange={actualizarForm} />
+              <input name="Precio" type="number" placeholder="Precio" value={form.Precio} onChange={actualizarForm} />
 
-              <input
-                name="Precio"
-                type="number"
-                placeholder="Precio"
-                value={form.Precio}
-                onChange={actualizarForm}
-              />
-
-              <select
-                name="Categoria"
-                value={form.Categoria}
-                onChange={actualizarForm}
-              >
+              <select name="Categoria" value={form.Categoria} onChange={actualizarForm}>
                 <option value="">Seleccionar categoría</option>
                 {categorias.map((cat) => (
                   <option key={cat._id} value={cat._id}>
@@ -283,24 +285,104 @@ function AdminPanel() {
                 ))}
               </select>
 
-
+              <input name="Imagen" placeholder="URL de imagen" value={form.Imagen} onChange={actualizarForm} />
               <input
-                name="Imagen"
-                placeholder="URL de imagen"
-                value={form.Imagen}
+                type="number"
+                placeholder="Stock"
+                name="Stock"
+                value={form.Stock || ""}
                 onChange={actualizarForm}
               />
+
             </div>
           )}
 
           <br />
 
-          {/* BOTONES */}
           {accion === "crear" && <button onClick={agregarProducto}>Agregar producto</button>}
           {accion === "editar" && <button onClick={editarProducto}>Editar producto</button>}
           {accion === "borrar" && <button onClick={desactivarProducto}>Eliminar producto</button>}
         </div>
       )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      {/* ===================================================== */}
+      {/* ======================= LOGS ========================= */}
+      {/* ===================================================== */}
+
+      <hr style={{ marginTop: "40px", marginBottom: "20px" }} />
+
+      <h2>Logs del sistema</h2>
+
+      <button onClick={() => cargarLogs(pagina)} style={{ marginBottom: "10px" }}>
+        Recargar Logs
+      </button>
+
+      <div
+        style={{
+          background: "#f3f3f3",
+          padding: "15px",
+          borderRadius: "8px",
+          maxHeight: "250px",
+          overflowY: "auto",
+          border: "1px solid #ccc"
+        }}
+      >
+        {logs.length === 0 ? (
+          <p>No hay logs disponibles...</p>
+        ) : (
+          logs.map((log, i) => (
+            <div
+              key={i}
+              style={{
+                padding: "8px",
+                marginBottom: "6px",
+                background: "white",
+                borderRadius: "5px",
+                border: "1px solid #ddd"
+              }}
+            >
+              {log.mensaje || log.msg || JSON.stringify(log)}
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* PAGINACIÓN */}
+      <div style={{ marginTop: "15px" }}>
+        <button
+          onClick={() => cargarLogs(pagina - 1)}
+          disabled={pagina <= 1}
+        >
+          ◀ Anterior
+        </button>
+
+        <span style={{ margin: "0 15px" }}>
+          Página {pagina} de {totalPaginas}
+        </span>
+
+        <button
+          onClick={() => cargarLogs(pagina + 1)}
+          disabled={pagina >= totalPaginas}
+        >
+          Siguiente ▶
+        </button>
+      </div>
     </div>
   );
 }

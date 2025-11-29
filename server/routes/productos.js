@@ -38,6 +38,7 @@ router.post("/", async (req, res) => {
       Categoria: req.body.Categoria || req.body.categoria,
       Imagen: req.body.Imagen || req.body.imagen,
       Descripcion: req.body.Descripcion || req.body.descripcion,
+      Stock: req.body.Stock || 0,
       Activo: true
     });
 
@@ -55,7 +56,6 @@ router.post("/", async (req, res) => {
   }
 });
 
-
 // EDITAR PRODUCTO + LOG
 router.put("/:id", async (req, res) => {
   try {
@@ -64,10 +64,11 @@ router.put("/:id", async (req, res) => {
       {
         Nombre: req.body.Nombre,
         Precio: req.body.Precio,
-        Categoria: req.body.Categoria, // ← CORREGIDO
+        Categoria: req.body.Categoria,
         Activo: req.body.Activo,
         Imagen: req.body.Imagen,
         Descripcion: req.body.Descripcion,
+        Stock: req.body.Stock // <--- se agrega Stock
       },
       { new: true }
     );
@@ -88,6 +89,36 @@ router.put("/:id", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ ok: false, error: "Error al editar el producto" });
+  }
+});
+
+// PATCH STOCK + LOG
+router.patch("/:id/stock", async (req, res) => {
+  try {
+    const { Stock } = req.body;
+
+    const actualizado = await Producto.findByIdAndUpdate(
+      req.params.id,
+      { Stock },
+      { new: true }
+    );
+
+    if (!actualizado) {
+      return res.status(404).json({ ok: false, error: "Producto no encontrado" });
+    }
+
+    // LOG
+    await Log.create({
+      Usuario: "admin",
+      Producto: actualizado._id.toString(),
+      Accion: `Stock actualizado a ${Stock} para ${actualizado.Nombre}`
+    });
+
+    res.json({ ok: true, producto: actualizado });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, error: "Error al actualizar stock" });
   }
 });
 

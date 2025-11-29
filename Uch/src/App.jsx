@@ -13,7 +13,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Mainpage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/admin" element={<AdminPanel />} />
+        <Route path="/admin/:id?" element={<AdminPanel />} />
       </Routes>
     </BrowserRouter>
   );
