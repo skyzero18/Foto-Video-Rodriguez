@@ -1,12 +1,12 @@
 const mongoose = require("mongoose");
 
 const FacturaSchema = new mongoose.Schema({
-  "Nombre y apellido": { type: String, required: true },
-  "Direccion": { type: String, required: true },
-  "Metodo de pago": { type: String, required: true },
-  "Producto": { type: String, required: true },
-  "Monto": { type: Number, required: true },
-  fecha: { type: Date, default: Date.now }
+  "Nombre y apellido": { type: String },
+  "Direccion": { type: String },
+  "Metodo de pago": { type: String },
+  "Producto": { type: String },
+  "Monto": { type: Number },
+  fecha: { type: Date, default: Date.now }  // Este campo está presente
 });
 
 module.exports = mongoose.model("Factura", FacturaSchema);

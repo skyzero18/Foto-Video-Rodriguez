@@ -31,6 +31,14 @@ function AdminPanel() {
     productoId: "",
     monto: ""
   });
+  // Estados para los combobox decorativos de filtrado por fecha
+  const [filtroDia, setFiltroDia] = useState("");
+  const [filtroMes, setFiltroMes] = useState("");
+  const [filtroAno, setFiltroAno] = useState("");
+  const [facturasDia, setFacturasDia] = useState([]);
+  const [cargandoFacturas, setCargandoFacturas] = useState(false);
+  const [facturaSeleccionada, setFacturaSeleccionada] = useState(null);
+  const [mostrarModal, setMostrarModal] = useState(false);
 
   const { logout } = useContext(AuthContext);
 
@@ -208,6 +216,48 @@ function AdminPanel() {
   const handleLogout = () => {
     logout();
     navigate("/login", { replace: true });
+  };
+
+  // Cargar facturas del día seleccionado
+  async function cargarFacturasDia(dia, mes, ano) {
+    try {
+      setCargandoFacturas(true);
+      setFacturasDia([]);
+      const params = new URLSearchParams({ dia: String(dia), mes: String(mes), ano: String(ano) });
+      const resp = await fetch(`http://localhost:4000/facturas/filtrar?${params.toString()}`);
+      const data = await resp.json();
+      if (data.ok) {
+        setFacturasDia(data.facturas || []);
+      } else {
+        setFacturasDia([]);
+      }
+    } catch (err) {
+      console.error("Error cargando facturas del día:", err);
+      setFacturasDia([]);
+    } finally {
+      setCargandoFacturas(false);
+    }
+  }
+
+  // Cargar detalles de factura seleccionada
+  const cargarDetallesFactura = async (facturaId) => {
+    if (!facturaId) return;
+    try {
+      const resp = await fetch(`http://localhost:4000/facturas/${facturaId}`);
+      const data = await resp.json();
+      if (data.ok) {
+        setFacturaSeleccionada(data.factura);
+        setMostrarModal(true);
+      }
+    } catch (err) {
+      console.error("Error cargando factura:", err);
+    }
+  };
+
+  // Cerrar modal
+  const cerrarModal = () => {
+    setMostrarModal(false);
+    setFacturaSeleccionada(null);
   };
 
   // Render
@@ -432,6 +482,85 @@ function AdminPanel() {
               <br />
               <button onClick={crearFactura}>Generar Factura</button>
             </div>
+
+            {/* Nuevo div decorativo: filtrado por fecha (día / mes / año) */}
+            <div style={{ borderTop: "1px solid #eee", marginTop: 12, paddingTop: 12 }}>
+              <h3 style={{ margin: "6px 0" }}>Filtrar facturas por fecha</h3>
+
+              <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8 }}>
+                {/* Día */}
+                <select
+                  value={filtroDia}
+                  onChange={async (e) => {
+                    const v = e.target.value; setFiltroDia(v);
+                    if (v && filtroMes && filtroAno) {
+                      await cargarFacturasDia(v, filtroMes, filtroAno);
+                    } else {
+                      setFacturasDia([]);
+                    }
+                  }}
+                >
+                  <option value="">Día</option>
+                  {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+
+                {/* Mes */}
+                <select
+                  value={filtroMes}
+                  onChange={async (e) => {
+                    const v = e.target.value; setFiltroMes(v);
+                    if (filtroDia && v && filtroAno) {
+                      await cargarFacturasDia(filtroDia, v, filtroAno);
+                    } else {
+                      setFacturasDia([]);
+                    }
+                  }}
+                >
+                  <option value="">Mes</option>
+                  {["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
+                    .map((m, idx) => <option key={idx} value={idx+1}>{m}</option>)}
+                </select>
+
+                {/* Año */}
+                <select
+                  value={filtroAno}
+                  onChange={async (e) => {
+                    const v = e.target.value; setFiltroAno(v);
+                    if (filtroDia && filtroMes && v) {
+                      await cargarFacturasDia(filtroDia, filtroMes, v);
+                    } else {
+                      setFacturasDia([]);
+                    }
+                  }}
+                >
+                  <option value="">Año</option>
+                  {Array.from({ length: 6 }, (_, i) => new Date().getFullYear() - i)
+                    .map((y) => <option key={y} value={y}>{y}</option>)}
+                </select>
+              </div>
+
+              {/* Cuarto combobox: facturas del día */}
+              <div>
+                <select 
+                  style={{ display: (filtroDia && filtroMes && filtroAno) ? "block" : "none", width: "100%" }}
+                  onChange={(e) => cargarDetallesFactura(e.target.value)}
+                >
+                  <option value="">
+                    {cargandoFacturas ? "Cargando..." : "Facturas del día"}
+                  </option>
+                  {facturasDia.map((f) => (
+                    <option key={f._id} value={f._id}>
+                      {f.Numero ? f.Numero : `${new Date(f.fecha).toLocaleTimeString()} - ${f.Producto || f["Producto"] || "Factura"}`}
+                    </option>
+                  ))}
+                  {!cargandoFacturas && facturasDia.length === 0 && filtroDia && filtroMes && filtroAno && (
+                    <option value="" disabled>Sin facturas para esa fecha</option>
+                  )}
+                </select>
+              </div>
+            </div>
           </div>
 
           <div className={styles["card"]}>
@@ -490,6 +619,57 @@ function AdminPanel() {
           </div>
         </div>
       </div>
+
+      {/* Modal para mostrar detalles de factura */}
+      {mostrarModal && facturaSeleccionada && (
+        <div className={styles["modal-overlay"]} onClick={cerrarModal}>
+          <div className={styles["modal-content"]} onClick={(e) => e.stopPropagation()}>
+            <button className={styles["modal-close"]} onClick={cerrarModal}>×</button>
+            
+            <h2 className={styles["modal-title"]}>📄 Detalle de Factura</h2>
+            
+            <div className={styles["factura-details"]}>
+              <div className={styles["detail-row"]}>
+                <span className={styles["detail-label"]}>Fecha:</span>
+                <span className={styles["detail-value"]}>
+                  {new Date(facturaSeleccionada.fecha).toLocaleString('es-ES', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </span>
+              </div>
+
+              <div className={styles["detail-row"]}>
+                <span className={styles["detail-label"]}>Cliente:</span>
+                <span className={styles["detail-value"]}>{facturaSeleccionada["Nombre y apellido"]}</span>
+              </div>
+
+              <div className={styles["detail-row"]}>
+                <span className={styles["detail-label"]}>Dirección:</span>
+                <span className={styles["detail-value"]}>{facturaSeleccionada.Direccion}</span>
+              </div>
+
+              <div className={styles["detail-row"]}>
+                <span className={styles["detail-label"]}>Producto:</span>
+                <span className={styles["detail-value"]}>{facturaSeleccionada.Producto}</span>
+              </div>
+
+              <div className={styles["detail-row"]}>
+                <span className={styles["detail-label"]}>Método de pago:</span>
+                <span className={styles["detail-value"]}>{facturaSeleccionada["Metodo de pago"]}</span>
+              </div>
+
+              <div className={styles["detail-row-total"]}>
+                <span className={styles["detail-label"]}>Total:</span>
+                <span className={styles["detail-value-total"]}>${facturaSeleccionada.Monto}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

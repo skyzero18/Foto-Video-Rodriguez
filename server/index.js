@@ -13,6 +13,7 @@ const facturasRoutes = require("./routes/facturas");
 app.use(cors());
 app.use(express.json());
 
+app.use("/facturas", facturasRoutes); // ← requerido
 
 const mongoURI =
   process.env.USE_ATLAS === "true"
@@ -28,6 +29,5 @@ app.use("/productos", productos); // ← RUTA AGREGADA
 app.use("/categorias", categoriasRoute);
 app.use("/usuarios", usuarioRoutes);
 app.use("/logs", logsRoutes);
-app.use("/facturas", facturasRoutes);
 
 app.listen(4000, () => console.log("Servidor en http://localhost:4000"));
