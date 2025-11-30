@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-
+import styles from "./AdminPage.module.css";
 import { useParams, useNavigate} from "react-router-dom";
-import "./AdminPage.module.css";
 
 function AdminPanel() {
    
@@ -62,9 +61,8 @@ function AdminPanel() {
       const res = await fetch("http://localhost:4000/productos");
       const data = await res.json();
       setProductos(data);
-      return data; // 👈 AGREGAR ESTO
+      return data;
     };
-
 
     useEffect(() => {
     cargarCategorias();
@@ -89,10 +87,6 @@ function AdminPanel() {
     cargarLogs(1);
   }, []);
 
-
-    // ----------------------------
-    // Manejar inputs
-    // ----------------------------
     const actualizarForm = (e) => {
       setForm({ ...form, [e.target.name]: e.target.value });
     };
@@ -212,10 +206,10 @@ function AdminPanel() {
 
   return (
     <>
-<header className="ml-header">
+      <header className={styles["ml-header"]}>
         <img src="\public\96919ec3-2b35-4e8c-b4cb-ab67f08d736d.jpg" alt="s"  style={{ width: "140px", height: "auto" }} />
       
-        <nav className="ml-nav">
+        <nav className={styles["ml-nav"]}>
           <button
             onClick={() => navigate("/main")}
             style={{
@@ -232,264 +226,246 @@ function AdminPanel() {
         </nav>
       </header>
 
-
-    <div className="admin-container">
+      <div className={styles["admin-container"]}>
       
-    <div className="admin-grid">
+        <div className={styles["admin-grid"]}>
 
-    <div className="card">
-      <h2>Panel Administrativo</h2>
+          <div className={styles["card"]}>
+            <h2>Panel Administrativo</h2>
 
-      {/* COMBO ACCION */}
-      <label>Acción:</label>
-      <select value={accion} onChange={(e) => setAccion(e.target.value)}>
-        <option value="crear">Crear</option>
-        <option value="editar">Editar</option>
-        <option value="borrar">Eliminar</option>
-      </select>
+            {/* COMBO ACCION */}
+            <label>Acción:</label>
+            <select value={accion} onChange={(e) => setAccion(e.target.value)}>
+              <option value="crear">Crear</option>
+              <option value="editar">Editar</option>
+              <option value="borrar">Eliminar</option>
+            </select>
 
-      <br /><br />
+            <br /><br />
 
-      {/* COMBO ENTIDAD */}
-      <label>Entidad:</label>
-      <select value={entidad} onChange={(e) => setEntidad(e.target.value)}>
-        <option value="producto">Producto</option>
-        <option value="categoria">Categoría</option>
-      </select>
+            {/* COMBO ENTIDAD */}
+            <label>Entidad:</label>
+            <select value={entidad} onChange={(e) => setEntidad(e.target.value)}>
+              <option value="producto">Producto</option>
+              <option value="categoria">Categoría</option>
+            </select>
 
-      <br /><br />
+            <br /><br />
 
-      {/* ===================================================== */}
-{/* ===============        CATEGORÍAS     =============== */}
-{/* ===================================================== */}
+            {/* ===================================================== */}
+            {/* ===============        CATEGORÍAS     =============== */}
+            {/* ===================================================== */}
 
-{entidad === "categoria" && (
-  <div>
-    {/* Combobox para seleccionar categoría al editar o borrar */}
-    {(accion === "editar" || accion === "borrar") && (
-      <>
-        <label>Seleccionar categoría:</label>
-        <select
-          value={categoriaId}
-          onChange={(e) => {
-            const idSeleccionado = e.target.value;
-            setCategoriaId(idSeleccionado);
+            {entidad === "categoria" && (
+              <div>
+                {/* Combobox para seleccionar categoría al editar o borrar */}
+                {(accion === "editar" || accion === "borrar") && (
+                  <>
+                    <label>Seleccionar categoría:</label>
+                    <select
+                      value={categoriaId}
+                      onChange={(e) => {
+                        const idSeleccionado = e.target.value;
+                        setCategoriaId(idSeleccionado);
 
-            // Auto-completa el input con el nombre de la categoría seleccionada
-            const cat = categorias.find(c => c._id === idSeleccionado);
-            setNuevoNombreCategoria(cat ? cat.Nombre : "");
-          }}
-        >
-          <option value="">Seleccione...</option>
-          {categorias.map((c) => (
-            <option key={c._id} value={c._id}>
-              {c.Nombre}
-            </option>
-          ))}
-        </select>
-        <br /><br />
-      </>
-    )}
+                        // Auto-completa el input con el nombre de la categoría seleccionada
+                        const cat = categorias.find(c => c._id === idSeleccionado);
+                        setNuevoNombreCategoria(cat ? cat.Nombre : "");
+                      }}
+                    >
+                      <option value="">Seleccione...</option>
+                      {categorias.map((c) => (
+                        <option key={c._id} value={c._id}>
+                          {c.Nombre}
+                        </option>
+                      ))}
+                    </select>
+                    <br /><br />
+                  </>
+                )}
 
-    {/* Input para editar categoría solo se usa si es editar */}
-    {accion === "editar" && categoriaId && (
-      <div>
-        <label>Nombre:</label>
-        <input
-          type="text"
-          value={nuevoNombreCategoria}
-          onChange={(e) => setNuevoNombreCategoria(e.target.value)}
-          placeholder="Nombre de la categoría"
-        />
-      </div>
-    )}
+                {/* Input para editar categoría solo se usa si es editar */}
+                {accion === "editar" && categoriaId && (
+                  <div>
+                    <label>Nombre:</label>
+                    <input
+                      type="text"
+                      value={nuevoNombreCategoria}
+                      onChange={(e) => setNuevoNombreCategoria(e.target.value)}
+                      placeholder="Nombre de la categoría"
+                    />
+                  </div>
+                )}
 
-    {/* Input para crear categoría */}
-    {accion === "crear" && (
-      <div>
-        <label>Nombre:</label>
-        <input
-          type="text"
-          value={nuevoNombreCategoria}
-          onChange={(e) => setNuevoNombreCategoria(e.target.value)}
-          placeholder="Nombre de la categoría"
-        />
-      </div>
-    )}
+                {/* Input para crear categoría */}
+                {accion === "crear" && (
+                  <div>
+                    <label>Nombre:</label>
+                    <input
+                      type="text"
+                      value={nuevoNombreCategoria}
+                      onChange={(e) => setNuevoNombreCategoria(e.target.value)}
+                      placeholder="Nombre de la categoría"
+                    />
+                  </div>
+                )}
 
-    <br />
+                <br />
 
-    {/* Botones según la acción */}
-    {accion === "crear" && <button onClick={crearCategoria}>Crear categoría</button>}
-    {accion === "editar" && <button onClick={editarCategoria}>Editar categoría</button>}
-    {accion === "borrar" && <button onClick={borrarCategoria}>Eliminar categoría</button>}
-  </div>
-)}
+                {/* Botones según la acción */}
+                {accion === "crear" && <button onClick={crearCategoria}>Crear categoría</button>}
+                {accion === "editar" && <button onClick={editarCategoria}>Editar categoría</button>}
+                {accion === "borrar" && <button onClick={borrarCategoria}>Eliminar categoría</button>}
+              </div>
+            )}
 
-      {/* ===================================================== */}
-      {/* ===============        PRODUCTOS      =============== */}
-      {/* ===================================================== */}
+            {/* ===================================================== */}
+            {/* ===============        PRODUCTOS      =============== */}
+            {/* ===================================================== */}
 
-      {entidad === "producto" && (
-        <div>
-          
+            {entidad === "producto" && (
+              <div>
+                {(accion === "crear" || accion === "editar") && (
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="ID del producto"
+                      value={productoId}
+                      onChange={(e) => setProductoId(e.target.value)}
+                    />
 
-          {(accion === "crear" || accion === "editar") && (
-            <div>
+                    <input name="Nombre" placeholder="Nombre" value={form.Nombre} onChange={actualizarForm} />
+                    <input name="Descripcion" placeholder="Descripción" value={form.Descripcion} onChange={actualizarForm} />
+                    <input name="Precio" type="number" placeholder="Precio" value={form.Precio} onChange={actualizarForm} />
+
+                    <select name="Categoria" value={form.Categoria} onChange={actualizarForm}>
+                      <option value="">Seleccionar categoría</option>
+                      {categorias.map((cat) => (
+                        <option key={cat._id} value={cat._id}>
+                          {cat.Nombre}
+                        </option>
+                      ))}
+                    </select>
+
+                    <input name="Imagen" placeholder="URL de imagen" value={form.Imagen} onChange={actualizarForm} />
+                    <input
+                      type="number"
+                      placeholder="Stock"
+                      name="Stock"
+                      value={form.Stock || ""}
+                      onChange={actualizarForm}
+                    />
+                  </div>
+                )}
+
+                <br />
+
+                {accion === "crear" && <button onClick={agregarProducto}>Agregar producto</button>}
+                {accion === "editar" && <button onClick={editarProducto}>Editar producto</button>}
+                {accion === "borrar" && <button onClick={desactivarProducto}>Eliminar producto</button>}
+              </div>
+            )}
+          </div>
+
+          <div className={styles["card"]}>
+            {/* ===================================================== */}
+            {/* ===================== FACTURAS ======================= */}
+            {/* ===================================================== */}
+
+            <h2>Generar Factura</h2>
+
+            <div className={styles["form-section"]}>
+              <input
+                type="text"
+                placeholder="Nombre y apellido"
+                onChange={(e) => setFactura({ ...factura, nombre: e.target.value })}
+              />
+
+              <input
+                type="text"
+                placeholder="Dirección"
+                onChange={(e) => setFactura({ ...factura, direccion: e.target.value })}
+              />
+
+              <input
+                type="text"
+                placeholder="Método de pago"
+                onChange={(e) => setFactura({ ...factura, metodoPago: e.target.value })}
+              />
+
               <input
                 type="text"
                 placeholder="ID del producto"
-                value={productoId}
-                onChange={(e) => setProductoId(e.target.value)}
+                onChange={(e) => setFactura({ ...factura, productoId: e.target.value })}
               />
 
-              <input name="Nombre" placeholder="Nombre" value={form.Nombre} onChange={actualizarForm} />
-              <input name="Descripcion" placeholder="Descripción" value={form.Descripcion} onChange={actualizarForm} />
-              <input name="Precio" type="number" placeholder="Precio" value={form.Precio} onChange={actualizarForm} />
-
-              <select name="Categoria" value={form.Categoria} onChange={actualizarForm}>
-                <option value="">Seleccionar categoría</option>
-                {categorias.map((cat) => (
-                  <option key={cat._id} value={cat._id}>
-                    {cat.Nombre}
-                  </option>
-                ))}
-              </select>
-
-              <input name="Imagen" placeholder="URL de imagen" value={form.Imagen} onChange={actualizarForm} />
               <input
                 type="number"
-                placeholder="Stock"
-                name="Stock"
-                value={form.Stock || ""}
-                onChange={actualizarForm}
+                placeholder="Monto"
+                onChange={(e) => setFactura({ ...factura, monto: e.target.value })}
               />
 
+              <br />
+              <button onClick={crearFactura}>Generar Factura</button>
             </div>
-          )}
+          </div>
 
-          <br />
+          <div className={styles["card"]}>
+            {/* ======================= LOGS ========================= */}
 
-          {accion === "crear" && <button onClick={agregarProducto}>Agregar producto</button>}
-          {accion === "editar" && <button onClick={editarProducto}>Editar producto</button>}
-          {accion === "borrar" && <button onClick={desactivarProducto}>Eliminar producto</button>}
+            <h2>Logs del sistema</h2>
+            <div className={styles["logs-container"]}>
+              {logs.length === 0 ? (
+                <p>No hay logs disponibles...</p>
+              ) : (
+                logs.map((log, i) => (
+                  <div key={i} className={styles["log-item"]}>
+                    <div className={styles["log-accion"]}>
+                      {log.Accion}
+                    </div>
+                    {log.Producto && (
+                      <div className={styles["log-producto"]}>
+                        {log.Producto}
+                      </div>
+                    )}
+                    <div className={styles["log-footer"]}>
+                      <span className={styles["log-fecha"]}>
+                        {new Date(log.Fecha).toLocaleDateString('es-ES', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </span>
+                      <strong className={styles["log-usuario"]}>{log.Usuario}</strong>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className={styles["pagination"]}>
+              <button
+                onClick={() => cargarLogs(pagina - 1)}
+                disabled={pagina <= 1}
+              >
+                ◀ Anterior
+              </button>
+
+              <span>
+                Página {pagina} de {totalPaginas}
+              </span>
+
+              <button
+                onClick={() => cargarLogs(pagina + 1)}
+                disabled={pagina >= totalPaginas}
+              >
+                Siguiente ▶
+              </button>
+            </div>
+          </div>
         </div>
-      )}
-  </div>
-
-
-    <div className="card">
-    {/* ===================================================== */}
-    {/* ===================== FACTURAS ======================= */}
-    {/* ===================================================== */}
-
-    <hr style={{ marginTop: "40px", marginBottom: "20px" }} />
-
-    <h2>Generar Factura</h2>
-
-    <div
-      style={{
-        background: "#f3f3f3",
-        padding: "15px",
-        borderRadius: "8px",
-        border: "1px solid #ccc",
-        marginBottom: "20px"
-      }}
-    >
-      <input
-        type="text"
-        placeholder="Nombre y apellido"
-        onChange={(e) => setFactura({ ...factura, nombre: e.target.value })}
-      />
-
-      <input
-        type="text"
-        placeholder="Dirección"
-        onChange={(e) => setFactura({ ...factura, direccion: e.target.value })}
-      />
-
-      <input
-        type="text"
-        placeholder="Método de pago"
-        onChange={(e) => setFactura({ ...factura, metodoPago: e.target.value })}
-      />
-
-      <input
-        type="text"
-        placeholder="ID del producto"
-        onChange={(e) => setFactura({ ...factura, productoId: e.target.value })}
-      />
-
-      <input
-        type="number"
-        placeholder="Monto"
-        onChange={(e) => setFactura({ ...factura, monto: e.target.value })}
-      />
-
-      <br />
-      <button onClick={crearFactura}>Generar Factura</button>
-    </div>
-
-    </div>
-
-
-    <div className="card">
-      {/* ======================= LOGS ========================= */}
-
-      <hr style={{ marginTop: "40px", marginBottom: "20px" }} />
-
-      <h2>Logs del sistema</h2>
-      <div
-        style={{
-          background: "#f3f3f3",
-          padding: "15px",
-          borderRadius: "8px",
-          maxHeight: "250px",
-          overflowY: "auto",
-          border: "1px solid #ccc"
-        }}
-      >
-        {logs.length === 0 ? (
-          <p>No hay logs disponibles...</p>
-        ) : (
-          logs.map((log, i) => (
-            <div
-              key={i}
-              style={{
-                padding: "8px",
-                marginBottom: "6px",
-                background: "white",
-                borderRadius: "5px",
-                border: "1px solid #ddd"
-              }}
-            >
-              {log.mensaje || log.msg || JSON.stringify(log)}
-            </div>
-          ))
-        )}
       </div>
-      <div style={{ marginTop: "15px" }}>
-        <button
-          onClick={() => cargarLogs(pagina - 1)}
-          disabled={pagina <= 1}
-        >
-          ◀ Anterior
-        </button>
-
-        <span style={{ margin: "0 15px" }}>
-          Página {pagina} de {totalPaginas}
-        </span>
-
-        <button
-          onClick={() => cargarLogs(pagina + 1)}
-          disabled={pagina >= totalPaginas}
-        >
-          Siguiente ▶
-        </button>
-      </div>
-    </div>
-    </div>
-    </div>
     </>
   );
 }

@@ -7,3 +7,8 @@
   box-sizing: border-box;
   font-family: "Inter", sans-serif;
 }
+/* Verifica que tu CSS global tenga esto: */
+html, body {
+  height: auto;
+  overflow: auto; /* ✅ Permite scroll */
+}

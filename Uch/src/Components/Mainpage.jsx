@@ -86,17 +86,16 @@ function Mainpage() {
   return (
     <>
       {/* NAVBAR */}
-      <header className="ml-header">
-      
-        <img src=".\public\96919ec3-2b35-4e8c-b4cb-ab67f08d736d.jpg" alt="s"  style={{ width: "140px", height: "auto" }} />
+      <header className={styles["ml-header"]}>
+        <img src=".\public\96919ec3-2b35-4e8c-b4cb-ab67f08d736d.jpg" alt="s" style={{ width: "140px", height: "auto" }} />
         <input
-          className="ml-search"
+          className={styles["ml-search"]}
           placeholder="Buscar productos, marcas..."
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
         />
 
-        <nav className="ml-nav">
+        <nav className={styles["ml-nav"]}>
           <button
             onClick={() => navigate("/admin")}
             style={{
@@ -114,7 +113,7 @@ function Mainpage() {
       </header>
 
       {/* FILTROS */}
-      <div className="ml-filtros">
+      <div className={styles["ml-filtros"]}>
         <label>Categorías: </label>
         <select value={categoria} onChange={(e) => setCategoria(e.target.value)}>
           <option value="todas">Todas</option>
@@ -130,35 +129,26 @@ function Mainpage() {
       {loading && <p style={{ textAlign: "center" }}>Cargando productos...</p>}
 
       {/* PRODUCTOS */}
-      <div className="ml-grid">
+      <div className={styles["ml-grid"]}>
         {!loading && filtrados.length === 0 ? (
           <p>No hay productos con esos filtros.</p>
         ) : (
           filtrados.map((p) => (
-            <div key={p._id} className="ml-card" style={{ position: "relative" }}>
+            <div key={p._id} className={styles["ml-card"]}>
               <img
                 src={p.Imagen || "https://via.placeholder.com/250"}
                 alt={p.Nombre}
               />
 
               {/* CONTADOR DE STOCK */}
-              <div
-                className="ml-card-stock"
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "5px",
-                  marginTop: "10px"
-                }}
-              >
-                <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
+              <div className={styles["ml-card-stock"]}>
+                <div className={styles["ml-card-stock-buttons"]}>
                   <button onClick={() => actualizarStock(p._id, -1)}>-</button>
                   <input type="number" value={p.Stock || 0} readOnly />
                   <button onClick={() => actualizarStock(p._id, 1)}>+</button>
                 </div>
 
-                {/* Botón Editar justo debajo */}
+                {/* Botón Editar */}
                 <button
                   onClick={() => navigate(`/admin/${p._id}`)}
                   style={{
@@ -176,12 +166,12 @@ function Mainpage() {
               </div>
 
               {/* INFO DEL PRODUCTO */}
-              <div className="ml-card-info">
+              <div className={styles["ml-card-info"]}>
                 <h3>{p.Nombre}</h3>
                 <p>{p.Descripcion}</p>
-                <span className="ml-category">{p.CategoriaNombre}</span>
+                <span className={styles["ml-category"]}>{p.CategoriaNombre}</span>
                 <p>Stock: {p.Stock}</p>
-                <span className="ml-price">${p.Precio}</span>
+                <span className={styles["ml-price"]}>${p.Precio}</span>
               </div>
             </div>
           ))

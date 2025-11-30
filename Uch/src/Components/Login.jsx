@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "./Login.module.css";
+import styles from "./Login.module.css";
 
 function LoginPage() {
 
@@ -71,7 +71,7 @@ function LoginPage() {
 
   return (
     <>
-      <header className="ml-header">
+      <header className={styles["ml-header"]}>
         <img
           src="/96919ec3-2b35-4e8c-b4cb-ab67f08d736d.jpg"
           alt="Logo"
@@ -79,18 +79,18 @@ function LoginPage() {
         />
       </header>
 
-      <div className="split-container">
+      <div className={styles["split-container"]}>
 
         {/* LADO IZQUIERDO: IMAGEN */}
-        <div className="split-left">
+        <div className={styles["split-left"]}>
           <img src="\public\8f296590-bd11-40f8-bd9c-4aac9be1dce9.jpg" alt="Fondo" />
         </div>
 
         {/* LADO DERECHO: LOGIN / REGISTRO */}
-        <div className="split-right">
+        <div className={styles["split-right"]}>
 
           {!mostrarRegistro && (
-            <div className="form-box">
+            <div className={styles["form-box"]}>
               <h2>Inicia Sesión</h2>
 
               <input
@@ -111,7 +111,7 @@ function LoginPage() {
 
               <button onClick={login}>Iniciar Sesión</button>
 
-              <p className="link-msg">
+              <p className={styles["link-msg"]}>
                 ¿No tienes cuenta?
                 <span onClick={() => setMostrarRegistro(true)}>Registrarte</span>
               </p>
@@ -119,7 +119,7 @@ function LoginPage() {
           )}
 
           {mostrarRegistro && (
-            <div className="form-box">
+            <div className={styles["form-box"]}>
               <h2>Crear Cuenta</h2>
 
               <input
@@ -156,7 +156,7 @@ function LoginPage() {
 
               <button onClick={registrar}>Registrarse</button>
 
-              <p className="link-msg">
+              <p className={styles["link-msg"]}>
                 ¿Ya tienes cuenta?
                 <span onClick={() => setMostrarRegistro(false)}>Iniciar sesión</span>
               </p>

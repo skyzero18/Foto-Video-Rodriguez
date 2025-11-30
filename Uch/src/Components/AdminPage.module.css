@@ -5,10 +5,7 @@
   box-sizing: border-box;
 }
 
-html, body {
-  height: 100%;
-  overflow: hidden; /* ❗ Evita scroll vertical */
-}
+
 
 /* ---------- Variables globales ---------- */
 :root {
@@ -27,7 +24,7 @@ html, body {
 
 /* ---------- Header fijo ---------- */
 .ml-header {
-  position: absolute;
+  position: sticky;
   top: 0;
   width: 100%;
   z-index: 20;
@@ -36,6 +33,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  gap: 20px;
   box-shadow: var(--sombra);
 }
 
@@ -43,6 +41,196 @@ html, body {
   height: 70px;
   border-radius: 10px;
   object-fit: cover;
+}
+
+.ml-nav {
+  display: flex;
+  gap: 15px;
+  font-weight: 500;
+  margin-left: auto;
+}
+
+/* ---------- Contenedor principal ---------- */
+.admin-container {
+  padding: 30px 20px;
+  background: var(--fondo);
+  min-height: calc(100vh - 102px);
+}
+
+/* ---------- Grid de tarjetas ---------- */
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: var(--gap);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ---------- Tarjetas ---------- */
+.card {
+  background: var(--secundario);
+  padding: var(--padding);
+  border-radius: var(--radio);
+  border: 1px solid var(--borde);
+  box-shadow: var(--sombra);
+}
+
+.card h2 {
+  color: var(--texto-oscuro);
+  margin-bottom: 15px;
+  font-size: 20px;
+}
+
+.card label {
+  display: block;
+  margin-top: 12px;
+  margin-bottom: 5px;
+  color: var(--texto-gris);
+  font-weight: 500;
+}
+
+.card input,
+.card select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.card input:focus,
+.card select:focus {
+  border-color: var(--primario);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0,131,50,0.1);
+}
+
+.card button {
+  width: 100%;
+  padding: 12px;
+  background: var(--primario);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.card button:hover {
+  opacity: 0.9;
+}
+
+.card button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------- Sección de formulario ---------- */
+.form-section {
+  background: #f3f3f3;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid var(--borde);
+  margin-bottom: 15px;
+}
+
+.form-section input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* ---------- Logs ---------- */
+.logs-container {
+  background: #f3f3f3;
+  padding: 15px;
+  border-radius: 8px;
+  max-height: 350px;
+  overflow-y: auto;
+  border: 1px solid var(--borde);
+  margin-bottom: 15px;
+}
+
+.log-item {
+  padding: 12px;
+  margin-bottom: 10px;
+  background: white;
+  border-radius: 6px;
+  border-left: 4px solid var(--primario);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.log-accion {
+  color: var(--texto-oscuro);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+
+.log-producto {
+  color: #666;
+  font-size: 12px;
+  background: #f9f9f9;
+  padding: 6px 8px;
+  border-radius: 4px;
+  border-left: 2px solid #ddd;
+  margin-bottom: 8px;
+  font-family: 'Courier New', monospace;
+  word-break: break-all;
+}
+
+.log-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #eee;
+  padding-top: 8px;
+}
+
+.log-fecha {
+  color: #999;
+  font-size: 11px;
+  background: #f0f0f0;
+  padding: 3px 8px;
+  border-radius: 3px;
+}
+
+.log-usuario {
+  color: var(--primario);
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+.pagination button {
+  padding: 8px 15px;
+  background: var(--primario);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.pagination button:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.pagination span {
+  color: var(--texto-gris);
+  font-size: 14px;
 }
 
 /* =======================================================================
@@ -182,6 +370,20 @@ html, body {
     width: 100%;
     height: calc(100vh - 280px);
     padding-top: 90px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ml-header {
+    flex-wrap: wrap;
+  }
+
+  .admin-container {
+    padding: 15px 10px;
   }
 }
 

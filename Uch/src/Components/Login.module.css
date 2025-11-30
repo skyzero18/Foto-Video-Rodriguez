@@ -7,12 +7,6 @@
   --transition: 0.25s ease;
 }
 
-body {
-  margin: 0;
-  background: var(--bg);
-  font-family: "Inter", sans-serif;
-}
-
 /* HEADER */
 .ml-header {
   width: 100%;
@@ -20,13 +14,10 @@ body {
   padding: 15px 25px;
 }
 
-/* ---------------------------- */
 /* SPLIT SCREEN */
-/* ---------------------------- */
-
 .split-container {
   display: flex;
-  height: calc(100vh - 90px); /* resta header */
+  height: calc(100vh - 90px);
 }
 
 /* MITAD IZQUIERDA (IMAGEN) */
@@ -48,6 +39,7 @@ body {
   justify-content: center;
   align-items: center;
   padding: 40px;
+  background: var(--bg);
 }
 
 /* FORMULARIOS */
@@ -91,6 +83,7 @@ body {
   border-radius: var(--radius);
   font-weight: bold;
   font-size: 17px;
+  cursor: pointer;
 }
 
 .form-box button:hover {
@@ -102,6 +95,7 @@ body {
   margin-top: 15px;
   text-align: center;
   font-size: 14px;
+  margin: 0;
 }
 
 .link-msg span {
@@ -111,10 +105,7 @@ body {
   margin-left: 5px;
 }
 
-/* ---------------------------- */
 /* RESPONSIVE */
-/* ---------------------------- */
-
 @media (max-width: 900px) {
   .split-container {
     flex-direction: column;
