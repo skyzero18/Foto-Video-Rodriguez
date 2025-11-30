@@ -21,14 +21,34 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     console.log("📝 Creando factura con datos:", req.body);
-    const productoId = req.body.productoId;
-    if (!productoId) {
-      return res.status(400).json({ ok: false, error: "productoId es requerido" });
+    const { productos: productosIds, ...otrosDatos } = req.body;
+
+    if (!productosIds || !Array.isArray(productosIds) || productosIds.length === 0) {
+      return res.status(400).json({ ok: false, error: "Se requiere al menos un producto" });
     }
 
-    const producto = await Producto.findById(productoId);
-    if (!producto) {
-      return res.status(404).json({ ok: false, error: "Producto no encontrado" });
+    // Procesar cada producto
+    const productosFactura = [];
+    let montoTotal = 0;
+
+    for (const item of productosIds) {
+      const producto = await Producto.findById(item.productoId);
+      if (!producto) {
+        return res.status(404).json({ ok: false, error: `Producto ${item.productoId} no encontrado` });
+      }
+
+      const cantidad = item.cantidad || 1;
+      const subtotal = producto.Precio * cantidad;
+
+      productosFactura.push({
+        productoId: producto._id,
+        nombre: producto.Nombre,
+        cantidad: cantidad,
+        precioUnitario: producto.Precio,
+        subtotal: subtotal
+      });
+
+      montoTotal += subtotal;
     }
 
     const fechaActual = new Date();
@@ -38,8 +58,8 @@ router.post("/", async (req, res) => {
       "Nombre y apellido": req.body["Nombre y apellido"],
       "Direccion": req.body["Direccion"],
       "Metodo de pago": req.body["Metodo de pago"],
-      "Producto": producto.Nombre,
-      "Monto": req.body["Monto"],
+      productos: productosFactura,
+      "Monto": montoTotal,
       fecha: fechaActual
     });
 

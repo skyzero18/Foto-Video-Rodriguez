@@ -28,7 +28,7 @@ function AdminPanel() {
     nombre: "",
     direccion: "",
     metodoPago: "",
-    productoId: "",
+    productos: [{ productoId: "", cantidad: 1 }],
     monto: ""
   });
   // Estados para los combobox decorativos de filtrado por fecha
@@ -42,25 +42,42 @@ function AdminPanel() {
 
   const { logout } = useContext(AuthContext);
 
+  // Agregar producto a la factura
+  const agregarProductoFactura = () => {
+    setFactura({
+      ...factura,
+      productos: [...factura.productos, { productoId: "", cantidad: 1 }]
+    });
+  };
+
+  // Eliminar producto de la factura
+  const eliminarProductoFactura = (index) => {
+    const nuevosProductos = factura.productos.filter((_, i) => i !== index);
+    setFactura({ ...factura, productos: nuevosProductos });
+  };
+
+  // Actualizar producto específico
+  const actualizarProductoFactura = (index, campo, valor) => {
+    const nuevosProductos = [...factura.productos];
+    nuevosProductos[index][campo] = valor;
+    setFactura({ ...factura, productos: nuevosProductos });
+  };
+
   const crearFactura = async () => {
-    const res = await fetch("http://localhost:4000/facturas", {
+    const facturaData = {
+      "Nombre y apellido": factura.nombre,
+      "Direccion": factura.direccion,
+      "Metodo de pago": factura.metodoPago,
+      productos: factura.productos
+    };
+    
+    await fetch("http://localhost:4000/facturas", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        "Nombre y apellido": factura.nombre,
-        "Direccion": factura.direccion,
-        "Metodo de pago": factura.metodoPago,
-        "productoId": factura.productoId,
-        "Monto": factura.monto
-      })
+      body: JSON.stringify(facturaData)
     });
-
-    const data = await res.json();
-
-      if (data.error) return alert(data.error);
-
-      alert("Factura generada correctamente");
-    };
+    alert("Factura creada");
+  };
     
     const cargarCategorias = async () => {
       const res = await fetch("http://localhost:4000/categorias");
@@ -467,17 +484,50 @@ function AdminPanel() {
                 onChange={(e) => setFactura({ ...factura, metodoPago: e.target.value })}
               />
 
-              <input
-                type="text"
-                placeholder="ID del producto"
-                onChange={(e) => setFactura({ ...factura, productoId: e.target.value })}
-              />
-
-              <input
-                type="number"
-                placeholder="Monto"
-                onChange={(e) => setFactura({ ...factura, monto: e.target.value })}
-              />
+              <h3 style={{ margin: "10px 0" }}>Productos</h3>
+              {factura.productos.map((prod, index) => (
+                <div key={index} style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
+                  <select
+                    value={prod.productoId}
+                    onChange={(e) => actualizarProductoFactura(index, "productoId", e.target.value)}
+                    style={{ flex: 2 }}
+                  >
+                    <option value="">Seleccionar producto</option>
+                    {productos.map((p) => (
+                      <option key={p._id} value={p._id}>
+                        {p.Nombre} - ${p.Precio}
+                      </option>
+                    ))}
+                  </select>
+                  
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder="Cant."
+                    value={prod.cantidad}
+                    onChange={(e) => actualizarProductoFactura(index, "cantidad", parseInt(e.target.value) || 1)}
+                    style={{ flex: 1, width: "80px" }}
+                  />
+                  
+                  {factura.productos.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => eliminarProductoFactura(index)}
+                      style={{ background: "#d32f2f", color: "white", border: "none", padding: "8px 12px", borderRadius: "4px", cursor: "pointer" }}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              ))}
+              
+              <button
+                type="button"
+                onClick={agregarProductoFactura}
+                style={{ marginTop: "8px", background: "#4CAF50", color: "white", border: "none", padding: "8px 16px", borderRadius: "4px", cursor: "pointer" }}
+              >
+                + Agregar Producto
+              </button>
 
               <br />
               <button onClick={crearFactura}>Generar Factura</button>
@@ -653,9 +703,17 @@ function AdminPanel() {
               </div>
 
               <div className={styles["detail-row"]}>
-                <span className={styles["detail-label"]}>Producto:</span>
-                <span className={styles["detail-value"]}>{facturaSeleccionada.Producto}</span>
+                <span className={styles["detail-label"]}>Productos:</span>
               </div>
+              
+              {facturaSeleccionada.productos && facturaSeleccionada.productos.map((prod, idx) => (
+                <div key={idx} className={styles["producto-item"]}>
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0" }}>
+                    <span>{prod.nombre} x {prod.cantidad}</span>
+                    <span>${prod.subtotal}</span>
+                  </div>
+                </div>
+              ))}
 
               <div className={styles["detail-row"]}>
                 <span className={styles["detail-label"]}>Método de pago:</span>

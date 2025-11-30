@@ -506,3 +506,11 @@
   font-weight: 700;
   color: #4CAF50;
 }
+
+.producto-item {
+  background: #f9f9f9;
+  padding: 8px 12px;
+  margin: 4px 0;
+  border-radius: 6px;
+  border-left: 3px solid var(--primario);
+}
