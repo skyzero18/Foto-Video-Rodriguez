@@ -47,7 +47,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // Update
-router.put("/:id", async (req, res) => {
+router.patch("/:id", async (req, res) => {
   try {
     const update = {
       "Nombre y apellido": req.body["Nombre y apellido"],

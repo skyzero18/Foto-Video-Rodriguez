@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import styles from "./Mainpage.module.css";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../Context/AuthContext";
 
 function Mainpage() {
   const [categoria, setCategoria] = useState("todas");
@@ -8,7 +9,10 @@ function Mainpage() {
   const [productos, setProductos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [paginaActual, setPaginaActual] = useState(1);
+  const productosPorPagina = 10;
   const navigate = useNavigate();
+  const { usuario, logout } = useContext(AuthContext);
 
   useEffect(() => {
     async function cargarDatos() {
@@ -37,6 +41,7 @@ function Mainpage() {
         setProductos(productosFinal);
         setCategorias(categoriasActivas);
         setLoading(false);
+        setPaginaActual(1); // Resetear paginación al cargar
       } catch (error) {
         console.error("Error cargando datos:", error);
         setLoading(false);
@@ -58,6 +63,12 @@ function Mainpage() {
     return coincideCat && coincideBusq && p.Activo === true;
   });
 
+  // PAGINACIÓN
+  const totalPaginas = Math.ceil(filtrados.length / productosPorPagina);
+  const indiceInicio = (paginaActual - 1) * productosPorPagina;
+  const indiceFin = indiceInicio + productosPorPagina;
+  const productosPaginados = filtrados.slice(indiceInicio, indiceFin);
+
   // Función para actualizar stock
   const actualizarStock = async (id, cambio) => {
     try {
@@ -68,7 +79,7 @@ function Mainpage() {
             if (nuevoStock < 0) return p; // evitar negativos
             // Actualizar backend
             fetch(`http://localhost:4000/productos/${id}`, {
-              method: "PUT",
+              method: "PATCH",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ Stock: nuevoStock })
             }).catch(err => console.error(err));
@@ -83,6 +94,11 @@ function Mainpage() {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
+
   return (
     <>
       {/* NAVBAR */}
@@ -92,10 +108,17 @@ function Mainpage() {
           className={styles["ml-search"]}
           placeholder="Buscar productos, marcas..."
           value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
+          onChange={(e) => {
+            setBusqueda(e.target.value);
+            setPaginaActual(1);
+          }}
         />
 
         <nav className={styles["ml-nav"]}>
+          <span style={{ color: "#333", fontWeight: "bold", marginRight: "20px" }}>
+            {usuario?.Nombre}
+          </span>
+
           <button
             onClick={() => navigate("/admin")}
             style={{
@@ -104,10 +127,26 @@ function Mainpage() {
               padding: "10px 15px",
               borderRadius: "5px",
               cursor: "pointer",
-              fontWeight: "bold"
+              fontWeight: "bold",
+              marginRight: "10px"
             }}
           >
             Admin Panel
+          </button>
+
+          <button
+            onClick={handleLogout}
+            style={{
+              background: "#d32f2f",
+              color: "white",
+              border: "none",
+              padding: "10px 15px",
+              borderRadius: "5px",
+              cursor: "pointer",
+              fontWeight: "bold"
+            }}
+          >
+            Cerrar Sesión
           </button>
         </nav>
       </header>
@@ -115,7 +154,13 @@ function Mainpage() {
       {/* FILTROS */}
       <div className={styles["ml-filtros"]}>
         <label>Categorías: </label>
-        <select value={categoria} onChange={(e) => setCategoria(e.target.value)}>
+        <select 
+          value={categoria} 
+          onChange={(e) => {
+            setCategoria(e.target.value);
+            setPaginaActual(1); // Resetear a página 1 al cambiar categoría
+          }}
+        >
           <option value="todas">Todas</option>
           {categorias.map((c) => (
             <option key={c._id} value={c.Nombre.toLowerCase()}>
@@ -133,7 +178,7 @@ function Mainpage() {
         {!loading && filtrados.length === 0 ? (
           <p>No hay productos con esos filtros.</p>
         ) : (
-          filtrados.map((p) => (
+          productosPaginados.map((p) => (
             <div key={p._id} className={styles["ml-card"]}>
               <img
                 src={p.Imagen || "https://via.placeholder.com/250"}
@@ -177,6 +222,29 @@ function Mainpage() {
           ))
         )}
       </div>
+
+      {/* PAGINACIÓN */}
+      {!loading && filtrados.length > 0 && (
+        <div className={styles["ml-pagination"]}>
+          <button 
+            onClick={() => setPaginaActual(Math.max(1, paginaActual - 1))}
+            disabled={paginaActual === 1}
+          >
+            ◀ Anterior
+          </button>
+
+          <span>
+            Página {paginaActual} de {totalPaginas}
+          </span>
+
+          <button 
+            onClick={() => setPaginaActual(Math.min(totalPaginas, paginaActual + 1))}
+            disabled={paginaActual === totalPaginas}
+          >
+            Siguiente ▶
+          </button>
+        </div>
+      )}
     </>
   );
 }

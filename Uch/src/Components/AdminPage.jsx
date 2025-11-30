@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import styles from "./AdminPage.module.css";
-import { useParams, useNavigate} from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { AuthContext } from "../Context/AuthContext";
 
 function AdminPanel() {
    
@@ -30,6 +31,8 @@ function AdminPanel() {
     productoId: "",
     monto: ""
   });
+
+  const { logout } = useContext(AuthContext);
 
   const crearFactura = async () => {
     const res = await fetch("http://localhost:4000/facturas", {
@@ -116,7 +119,7 @@ function AdminPanel() {
       if (!productoId) return alert("Seleccione un producto");
 
       await fetch(`http://localhost:4000/productos/${productoId}`, {
-        method: "PUT",
+        method: "PATCH", // ← Cambiar de PUT a PATCH
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
@@ -129,7 +132,7 @@ function AdminPanel() {
       if (!productoId) return alert("Seleccione un producto");
 
       await fetch(`http://localhost:4000/productos/${productoId}`, {
-        method: "PUT",
+        method: "PATCH", // ← Cambiar de PUT a PATCH
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ Activo: false }),
       });
@@ -161,7 +164,7 @@ function AdminPanel() {
     if (!nuevoNombreCategoria) return alert("Ingrese nuevo nombre");
 
     await fetch(`http://localhost:4000/categorias/${categoriaId}`, {
-      method: "PUT",
+      method: "PATCH", // ← Cambiar de PUT a PATCH
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ Nombre: nuevoNombreCategoria }),
     });
@@ -202,12 +205,17 @@ function AdminPanel() {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
+
   // Render
 
   return (
     <>
       <header className={styles["ml-header"]}>
-        <img src="\public\96919ec3-2b35-4e8c-b4cb-ab67f08d736d.jpg" alt="s"  style={{ width: "140px", height: "auto" }} />
+        <img src="\public\96919ec3-2b35-4e8c-b4cb-ab67f08d736d.jpg" alt="s" style={{ width: "140px", height: "auto" }} />
       
         <nav className={styles["ml-nav"]}>
           <button
@@ -218,10 +226,26 @@ function AdminPanel() {
               padding: "10px 15px",
               borderRadius: "5px",
               cursor: "pointer",
-              fontWeight: "bold"
+              fontWeight: "bold",
+              marginRight: "10px"
             }}
           >
             Inicio
+          </button>
+
+          <button
+            onClick={handleLogout}
+            style={{
+              background: "#d32f2f",
+              color: "white",
+              border: "none",
+              padding: "10px 15px",
+              borderRadius: "5px",
+              cursor: "pointer",
+              fontWeight: "bold"
+            }}
+          >
+            Cerrar Sesión
           </button>
         </nav>
       </header>

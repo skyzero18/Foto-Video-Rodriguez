@@ -1,23 +1,51 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import LoginPage from './Components/Login'
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./Context/AuthContext";
+import { ProtectedRoute } from "./Components/ProtectedRoute";
+import Login from "./Components/Login";
 import Mainpage from "./Components/Mainpage";
-import AdminPanel from "./Components/AdminPage";
+import AdminPage from "./Components/AdminPage";
+import './App.css'
+
 function App() {
-  
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Mainpage />} />
-        <Route path="/main" element={<Mainpage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/admin/:id?" element={<AdminPanel />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+
+          <Route
+            path="/main"
+            element={
+              <ProtectedRoute>
+                <Mainpage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/:id"
+            element={
+              <ProtectedRoute>
+                <AdminPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Ruta por defecto */}
+          <Route path="/" element={<Navigate to="/login" />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 
-export default App
+export default App;

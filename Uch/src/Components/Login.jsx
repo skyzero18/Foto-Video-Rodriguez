@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useState, useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "./Login.module.css";
+import { AuthContext } from "../Context/AuthContext";
 
 function LoginPage() {
-
   const [mostrarRegistro, setMostrarRegistro] = useState(false);
+  const navigate = useNavigate();
+  const { usuario, setUsuario } = useContext(AuthContext);
 
   const [form, setForm] = useState({
     Nombre: "",
@@ -17,6 +20,13 @@ function LoginPage() {
     contraseña: "",
   });
 
+  // Si ya está logueado, redirige a main
+  useEffect(() => {
+    if (usuario) {
+      navigate("/main", { replace: true });
+    }
+  }, [usuario, navigate]);
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -26,6 +36,11 @@ function LoginPage() {
   };
 
   const registrar = async () => {
+    if (!form.Nombre || !form.Correo || !form.contraseña || !form.claveRegistro) {
+      alert("Completa todos los campos");
+      return;
+    }
+
     try {
       const res = await fetch("http://localhost:4000/usuarios", {
         method: "POST",
@@ -40,13 +55,21 @@ function LoginPage() {
         return;
       }
 
-      alert("Usuario registrado correctamente");
+      alert("Usuario registrado correctamente. Inicia sesión");
+      setMostrarRegistro(false);
+      setForm({ Nombre: "", Correo: "", contraseña: "", claveRegistro: "" });
     } catch (error) {
+      console.error(error);
       alert("Error al registrar usuario");
     }
   };
 
   const login = async () => {
+    if (!loginForm.Correo || !loginForm.contraseña) {
+      alert("Completa correo y contraseña");
+      return;
+    }
+
     try {
       const res = await fetch("http://localhost:4000/usuarios/login", {
         method: "POST",
@@ -57,14 +80,19 @@ function LoginPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.mensaje || "Error al iniciar sesión");
+        alert(data.mensaje || "Credenciales incorrectas");
         return;
       }
 
-      alert("Login exitoso. Bienvenido " + data.usuario.Nombre);
+      alert("¡Bienvenido " + data.usuario.Nombre + "!");
 
+      // Guardar usuario en localStorage y Context
       localStorage.setItem("usuario", JSON.stringify(data.usuario));
+      setUsuario(data.usuario);
+
+      // Redirigir a main (el useEffect se encargará)
     } catch (error) {
+      console.error(error);
       alert("Error al iniciar sesión");
     }
   };
@@ -80,7 +108,6 @@ function LoginPage() {
       </header>
 
       <div className={styles["split-container"]}>
-
         {/* LADO IZQUIERDO: IMAGEN */}
         <div className={styles["split-left"]}>
           <img src="\public\8f296590-bd11-40f8-bd9c-4aac9be1dce9.jpg" alt="Fondo" />

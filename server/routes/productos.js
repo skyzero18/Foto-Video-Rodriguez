@@ -57,38 +57,13 @@ router.post("/", async (req, res) => {
 });
 
 // EDITAR PRODUCTO + LOG
-router.put("/:id", async (req, res) => {
+router.patch("/:id", async (req, res) => {
   try {
-    const actualizado = await Producto.findByIdAndUpdate(
-      req.params.id,
-      {
-        Nombre: req.body.Nombre,
-        Precio: req.body.Precio,
-        Categoria: req.body.Categoria,
-        Activo: req.body.Activo,
-        Imagen: req.body.Imagen,
-        Descripcion: req.body.Descripcion,
-        Stock: req.body.Stock // <--- se agrega Stock
-      },
-      { new: true }
-    );
-
-    if (!actualizado) {
-      return res.status(404).json({ ok: false, error: "Producto no encontrado" });
-    }
-
-    // LOG
-    await Log.create({
-      Usuario: "admin",
-      Producto: actualizado._id.toString(),
-      Accion: `Producto editado: ${actualizado.Nombre}`
-    });
-
-    res.json({ ok: true, producto: actualizado });
-
+    const producto = await Producto.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!producto) return res.status(404).json({ error: "Producto no encontrado" });
+    res.json(producto);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ ok: false, error: "Error al editar el producto" });
+    res.status(500).json({ error: err.message });
   }
 });
 
