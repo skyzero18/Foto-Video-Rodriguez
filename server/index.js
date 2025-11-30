@@ -1,3 +1,5 @@
+require("dotenv").config({ path: "./Mongo.env" });
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -12,10 +14,15 @@ app.use(cors());
 app.use(express.json());
 
 
-mongoose.connect("mongodb://localhost:27017/Rodriguez")
-  .then(() => console.log("MongoDB conectado"))
-  .catch(err => console.log(err));
+const mongoURI =
+  process.env.USE_ATLAS === "true"
+    ? process.env.MONGO_URI_ATLAS
+    : process.env.MONGO_URI_LOCAL;
 
+mongoose
+  .connect(mongoURI)
+  .then(() => console.log("MongoDB conectado a:", process.env.USE_ATLAS === "true" ? "ATLAS" : "LOCAL"))
+  .catch((err) => console.log("Error MongoDB:", err));
 
 app.use("/productos", productos); // ← RUTA AGREGADA
 app.use("/categorias", categoriasRoute);
