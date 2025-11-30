@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
 
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate} from "react-router-dom";
+import "./AdminPage.module.css";
 
 function AdminPanel() {
+   
   const [accion, setAccion] = useState("crear");
   const [entidad, setEntidad] = useState("producto");
   const { id } = useParams();
 
   const [categorias, setCategorias] = useState([]);
   const [productos, setProductos] = useState([]);
-
+  const navigate = useNavigate();
   const [categoriaId, setCategoriaId] = useState("");
   const [productoId, setProductoId] = useState("");
 
@@ -22,128 +24,125 @@ function AdminPanel() {
   });
 
   const [nuevoNombreCategoria, setNuevoNombreCategoria] = useState("");
-const [factura, setFactura] = useState({
-  nombre: "",
-  direccion: "",
-  metodoPago: "",
-  productoId: "",
-  monto: ""
-});
-
-const crearFactura = async () => {
-  const res = await fetch("http://localhost:4000/facturas", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      "Nombre y apellido": factura.nombre,
-      "Direccion": factura.direccion,
-      "Metodo de pago": factura.metodoPago,
-      "productoId": factura.productoId,
-      "Monto": factura.monto
-    })
+  const [factura, setFactura] = useState({
+    nombre: "",
+    direccion: "",
+    metodoPago: "",
+    productoId: "",
+    monto: ""
   });
 
-  const data = await res.json();
-
-  if (data.error) return alert(data.error);
-
-  alert("Factura generada correctamente");
-};
-
-  // ----------------------------
-  // Cargar datos iniciales
-  // ----------------------------
-  const cargarCategorias = async () => {
-    const res = await fetch("http://localhost:4000/categorias");
-    const data = await res.json();
-    setCategorias(data);
-  };
-
-  const cargarProductos = async () => {
-    const res = await fetch("http://localhost:4000/productos");
-    const data = await res.json();
-    setProductos(data);
-    return data; // 👈 AGREGAR ESTO
-  };
-
-
-  useEffect(() => {
-  cargarCategorias();
-  cargarProductos().then((dataProductos) => {
-    if (id) {
-      setAccion("editar");
-      setEntidad("producto");
-      setProductoId(id);
-
-      const producto = dataProductos.find(p => p._id === id);
-      if (producto) {
-        setForm({
-          Nombre: producto.Nombre,
-          Descripcion: producto.Descripcion,
-          Precio: producto.Precio,
-          Categoria: producto.Categoria,
-          Imagen: producto.Imagen
-        });
-      }
-    }
-  });
-  cargarLogs(1);
-}, []);
-
-
-  // ----------------------------
-  // Manejar inputs
-  // ----------------------------
-  const actualizarForm = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  // ============================================================
-  // ==================== PRODUCTOS =============================
-  // ============================================================
-
-  const agregarProducto = async () => {
-    await fetch("http://localhost:4000/productos", {
+  const crearFactura = async () => {
+    const res = await fetch("http://localhost:4000/facturas", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        nombre: form.Nombre,
-        descripcion: form.Descripcion,
-        precio: form.Precio,
-        categoria: form.Categoria,
-        imagen: form.Imagen,
-      }),
+        "Nombre y apellido": factura.nombre,
+        "Direccion": factura.direccion,
+        "Metodo de pago": factura.metodoPago,
+        "productoId": factura.productoId,
+        "Monto": factura.monto
+      })
     });
 
-    alert("Producto creado");
-    cargarProductos();
-  };
+    const data = await res.json();
 
-  const editarProducto = async () => {
-    if (!productoId) return alert("Seleccione un producto");
+      if (data.error) return alert(data.error);
 
-    await fetch(`http://localhost:4000/productos/${productoId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      alert("Factura generada correctamente");
+    };
+    
+    const cargarCategorias = async () => {
+      const res = await fetch("http://localhost:4000/categorias");
+      const data = await res.json();
+      setCategorias(data);
+    };
+
+    const cargarProductos = async () => {
+      const res = await fetch("http://localhost:4000/productos");
+      const data = await res.json();
+      setProductos(data);
+      return data; // 👈 AGREGAR ESTO
+    };
+
+
+    useEffect(() => {
+    cargarCategorias();
+    cargarProductos().then((dataProductos) => {
+      if (id) {
+        setAccion("editar");
+        setEntidad("producto");
+        setProductoId(id);
+
+        const producto = dataProductos.find(p => p._id === id);
+        if (producto) {
+          setForm({
+            Nombre: producto.Nombre,
+            Descripcion: producto.Descripcion,
+            Precio: producto.Precio,
+            Categoria: producto.Categoria,
+            Imagen: producto.Imagen
+          });
+        }
+      }
     });
+    cargarLogs(1);
+  }, []);
 
-    alert("Producto editado");
-    cargarProductos();
-  };
 
-  const desactivarProducto = async () => {
-    if (!productoId) return alert("Seleccione un producto");
+    // ----------------------------
+    // Manejar inputs
+    // ----------------------------
+    const actualizarForm = (e) => {
+      setForm({ ...form, [e.target.name]: e.target.value });
+    };
 
-    await fetch(`http://localhost:4000/productos/${productoId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ Activo: false }),
-    });
+    // ============================================================
+    // ==================== PRODUCTOS =============================
+    // ============================================================
 
-    alert("Producto eliminado");
-    cargarProductos();
-  };
+    const agregarProducto = async () => {
+      await fetch("http://localhost:4000/productos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombre: form.Nombre,
+          descripcion: form.Descripcion,
+          precio: form.Precio,
+          categoria: form.Categoria,
+          imagen: form.Imagen,
+        }),
+      });
+
+      alert("Producto creado");
+      cargarProductos();
+    };
+
+    const editarProducto = async () => {
+      if (!productoId) return alert("Seleccione un producto");
+
+      await fetch(`http://localhost:4000/productos/${productoId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      alert("Producto editado");
+      cargarProductos();
+    };
+
+    const desactivarProducto = async () => {
+      if (!productoId) return alert("Seleccione un producto");
+
+      await fetch(`http://localhost:4000/productos/${productoId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ Activo: false }),
+      });
+
+      alert("Producto eliminado");
+      cargarProductos();
+    };
 
   // ============================================================
   // ==================== CATEGORÍAS ============================
@@ -190,9 +189,7 @@ const crearFactura = async () => {
     cargarCategorias();
   };
 
-  // ============================================================
   // ====================== LOGS ================================
-  // ============================================================
 
   const [logs, setLogs] = useState([]);
   const [pagina, setPagina] = useState(1);
@@ -211,12 +208,36 @@ const crearFactura = async () => {
     }
   };
 
-  // ============================================================
-  // ====================== RENDER ==============================
-  // ============================================================
+  // Render
 
   return (
-    <div style={{ padding: "20px" }}>
+    <>
+<header className="ml-header">
+        <img src="\public\96919ec3-2b35-4e8c-b4cb-ab67f08d736d.jpg" alt="s"  style={{ width: "140px", height: "auto" }} />
+      
+        <nav className="ml-nav">
+          <button
+            onClick={() => navigate("/main")}
+            style={{
+              background: "#fff",
+              border: "none",
+              padding: "10px 15px",
+              borderRadius: "5px",
+              cursor: "pointer",
+              fontWeight: "bold"
+            }}
+          >
+            Inicio
+          </button>
+        </nav>
+      </header>
+
+
+    <div className="admin-container">
+      
+    <div className="admin-grid">
+
+    <div className="card">
       <h2>Panel Administrativo</h2>
 
       {/* COMBO ACCION */}
@@ -239,48 +260,71 @@ const crearFactura = async () => {
       <br /><br />
 
       {/* ===================================================== */}
-      {/* ===============        CATEGORÍAS     =============== */}
-      {/* ===================================================== */}
+{/* ===============        CATEGORÍAS     =============== */}
+{/* ===================================================== */}
 
-      {entidad === "categoria" && (
-        <div>
-          {(accion === "editar" || accion === "borrar") && (
-            <>
-              <label>Seleccionar categoría:</label>
-              <select
-                value={categoriaId}
-                onChange={(e) => setCategoriaId(e.target.value)}
-              >
-                <option value="">Seleccione...</option>
-                {categorias.map((c) => (
-                  <option key={c._id} value={c._id}>
-                    {c.Nombre}
-                  </option>
-                ))}
-              </select>
-              <br /><br />
-            </>
-          )}
+{entidad === "categoria" && (
+  <div>
+    {/* Combobox para seleccionar categoría al editar o borrar */}
+    {(accion === "editar" || accion === "borrar") && (
+      <>
+        <label>Seleccionar categoría:</label>
+        <select
+          value={categoriaId}
+          onChange={(e) => {
+            const idSeleccionado = e.target.value;
+            setCategoriaId(idSeleccionado);
 
-          {(accion === "editar" || accion === "crear") && (
-            <div>
-              <label>Nombre:</label>
-              <input
-                type="text"
-                value={nuevoNombreCategoria}
-                onChange={(e) => setNuevoNombreCategoria(e.target.value)}
-                placeholder="Nombre de la categoría"
-              />
-            </div>
-          )}
+            // Auto-completa el input con el nombre de la categoría seleccionada
+            const cat = categorias.find(c => c._id === idSeleccionado);
+            setNuevoNombreCategoria(cat ? cat.Nombre : "");
+          }}
+        >
+          <option value="">Seleccione...</option>
+          {categorias.map((c) => (
+            <option key={c._id} value={c._id}>
+              {c.Nombre}
+            </option>
+          ))}
+        </select>
+        <br /><br />
+      </>
+    )}
 
-          <br />
+    {/* Input para editar categoría solo se usa si es editar */}
+    {accion === "editar" && categoriaId && (
+      <div>
+        <label>Nombre:</label>
+        <input
+          type="text"
+          value={nuevoNombreCategoria}
+          onChange={(e) => setNuevoNombreCategoria(e.target.value)}
+          placeholder="Nombre de la categoría"
+        />
+      </div>
+    )}
 
-          {accion === "crear" && <button onClick={crearCategoria}>Crear categoría</button>}
-          {accion === "editar" && <button onClick={editarCategoria}>Editar categoría</button>}
-          {accion === "borrar" && <button onClick={borrarCategoria}>Eliminar categoría</button>}
-        </div>
-      )}
+    {/* Input para crear categoría */}
+    {accion === "crear" && (
+      <div>
+        <label>Nombre:</label>
+        <input
+          type="text"
+          value={nuevoNombreCategoria}
+          onChange={(e) => setNuevoNombreCategoria(e.target.value)}
+          placeholder="Nombre de la categoría"
+        />
+      </div>
+    )}
+
+    <br />
+
+    {/* Botones según la acción */}
+    {accion === "crear" && <button onClick={crearCategoria}>Crear categoría</button>}
+    {accion === "editar" && <button onClick={editarCategoria}>Editar categoría</button>}
+    {accion === "borrar" && <button onClick={borrarCategoria}>Eliminar categoría</button>}
+  </div>
+)}
 
       {/* ===================================================== */}
       {/* ===============        PRODUCTOS      =============== */}
@@ -331,85 +375,70 @@ const crearFactura = async () => {
           {accion === "borrar" && <button onClick={desactivarProducto}>Eliminar producto</button>}
         </div>
       )}
+  </div>
 
 
+    <div className="card">
+    {/* ===================================================== */}
+    {/* ===================== FACTURAS ======================= */}
+    {/* ===================================================== */}
+
+    <hr style={{ marginTop: "40px", marginBottom: "20px" }} />
+
+    <h2>Generar Factura</h2>
+
+    <div
+      style={{
+        background: "#f3f3f3",
+        padding: "15px",
+        borderRadius: "8px",
+        border: "1px solid #ccc",
+        marginBottom: "20px"
+      }}
+    >
+      <input
+        type="text"
+        placeholder="Nombre y apellido"
+        onChange={(e) => setFactura({ ...factura, nombre: e.target.value })}
+      />
+
+      <input
+        type="text"
+        placeholder="Dirección"
+        onChange={(e) => setFactura({ ...factura, direccion: e.target.value })}
+      />
+
+      <input
+        type="text"
+        placeholder="Método de pago"
+        onChange={(e) => setFactura({ ...factura, metodoPago: e.target.value })}
+      />
+
+      <input
+        type="text"
+        placeholder="ID del producto"
+        onChange={(e) => setFactura({ ...factura, productoId: e.target.value })}
+      />
+
+      <input
+        type="number"
+        placeholder="Monto"
+        onChange={(e) => setFactura({ ...factura, monto: e.target.value })}
+      />
+
+      <br />
+      <button onClick={crearFactura}>Generar Factura</button>
+    </div>
+
+    </div>
 
 
-{/* ===================================================== */}
-{/* ===================== FACTURAS ======================= */}
-{/* ===================================================== */}
-
-<hr style={{ marginTop: "40px", marginBottom: "20px" }} />
-
-<h2>Generar Factura</h2>
-
-<div
-  style={{
-    background: "#f3f3f3",
-    padding: "15px",
-    borderRadius: "8px",
-    border: "1px solid #ccc",
-    marginBottom: "20px"
-  }}
->
-  <input
-    type="text"
-    placeholder="Nombre y apellido"
-    onChange={(e) => setFactura({ ...factura, nombre: e.target.value })}
-  />
-
-  <input
-    type="text"
-    placeholder="Dirección"
-    onChange={(e) => setFactura({ ...factura, direccion: e.target.value })}
-  />
-
-  <input
-    type="text"
-    placeholder="Método de pago"
-    onChange={(e) => setFactura({ ...factura, metodoPago: e.target.value })}
-  />
-
-  <input
-    type="text"
-    placeholder="ID del producto"
-    onChange={(e) => setFactura({ ...factura, productoId: e.target.value })}
-  />
-
-  <input
-    type="number"
-    placeholder="Monto"
-    onChange={(e) => setFactura({ ...factura, monto: e.target.value })}
-  />
-
-  <br />
-  <button onClick={crearFactura}>Generar Factura</button>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-      {/* ===================================================== */}
+    <div className="card">
       {/* ======================= LOGS ========================= */}
-      {/* ===================================================== */}
 
       <hr style={{ marginTop: "40px", marginBottom: "20px" }} />
 
       <h2>Logs del sistema</h2>
-
-      <button onClick={() => cargarLogs(pagina)} style={{ marginBottom: "10px" }}>
-        Recargar Logs
-      </button>
-
       <div
         style={{
           background: "#f3f3f3",
@@ -439,8 +468,6 @@ const crearFactura = async () => {
           ))
         )}
       </div>
-
-      {/* PAGINACIÓN */}
       <div style={{ marginTop: "15px" }}>
         <button
           onClick={() => cargarLogs(pagina - 1)}
@@ -461,6 +488,9 @@ const crearFactura = async () => {
         </button>
       </div>
     </div>
+    </div>
+    </div>
+    </>
   );
 }
 

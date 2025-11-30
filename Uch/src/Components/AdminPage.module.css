@@ -1,0 +1,190 @@
+/* ---------- Reset ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden; /* ❗ Evita scroll vertical */
+}
+
+/* ---------- Variables globales ---------- */
+:root {
+  --primario: #008332;
+  --secundario: #ffffff;
+  --fondo: #f4f4f4;
+  --borde: #dddddd;
+  --radio: 14px;
+  --sombra: 0 4px 10px rgba(0,0,0,0.08);
+  --padding: 18px;
+  --gap: 22px;
+  --texto-gris: #555;
+  --texto-oscuro: #222;
+  --amarillo: #FDEF14;
+}
+
+/* ---------- Header fijo ---------- */
+.ml-header {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: 20;
+  background: var(--amarillo);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  box-shadow: var(--sombra);
+}
+
+.ml-header img {
+  height: 70px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+/* =======================================================================
+   SPLIT SCREEN FULL PAGE (LOGIN)
+======================================================================= */
+.split-container {
+  display: flex;
+  width: 100%;
+  height: 100vh;   /* 👈 Full pantalla */
+}
+
+/* ---------- IZQUIERDA: Imagen ---------- */
+.split-left {
+  width: 50%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.split-left img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 🔥 DIFUMINADO hacia la derecha */
+.split-left::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 140px;
+  height: 100%;
+  background: linear-gradient(to right, transparent, white);
+
+  pointer-events: none;
+}
+
+/* ---------- DERECHA: Formulario ---------- */
+.split-right {
+  width: 50%;
+  height: 100%;
+  background: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 70px; /* para no tapar con el header */
+}
+
+/* Caja glass / tarjeta */
+.form-box {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px); /* ⭐ efecto vidrio */
+  border-radius: var(--radio);
+  padding: 35px;
+  width: 100%;
+  max-width: 380px;
+  border: 1px solid rgba(255,255,255,0.5);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  animation: fadeIn 0.3s ease;
+}
+
+.form-box h2 {
+  text-align: center;
+  margin-bottom: 18px;
+  color: var(--texto-oscuro);
+}
+
+/* Inputs */
+.form-box input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 12px;
+  border-radius: var(--radio);
+  border: 1px solid var(--borde);
+  background: rgba(255,255,255,0.6);
+  font-size: 16px;
+}
+
+.form-box input:focus {
+  border-color: var(--primario);
+  box-shadow: 0 0 0 3px rgba(0,131,50,0.25);
+  outline: none;
+}
+
+/* Botón */
+.form-box button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 20px;
+  border: none;
+  background: var(--primario);
+  color: white;
+  font-size: 17px;
+  border-radius: var(--radio);
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+.form-box button:hover {
+  opacity: 0.9;
+}
+
+/* Link: cambiar a registrar / login */
+.link-msg {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.link-msg span {
+  color: var(--primario);
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* Animación suave */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =======================================================================
+   RESPONSIVE
+======================================================================= */
+@media (max-width: 900px) {
+  .split-container {
+    flex-direction: column;
+  }
+
+  .split-left {
+    width: 100%;
+    height: 280px;
+  }
+
+  .split-right {
+    width: 100%;
+    height: calc(100vh - 280px);
+    padding-top: 90px;
+  }
+}
+
+/* =======================================================================
+   (LO DEMÁS: TU CSS DE ADMIN SE MANTIENE TAL CUAL)
+======================================================================= */

@@ -7,11 +7,12 @@ import LoginPage from './Components/Login'
 import Mainpage from "./Components/Mainpage";
 import AdminPanel from "./Components/AdminPage";
 function App() {
-
+  
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Mainpage />} />
+        <Route path="/main" element={<Mainpage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/admin/:id?" element={<AdminPanel />} />
       </Routes>

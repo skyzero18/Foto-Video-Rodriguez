@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "./mainpage.css";
+import styles from "./Mainpage.module.css";
 import { useNavigate } from "react-router-dom";
 
 function Mainpage() {
@@ -87,8 +87,8 @@ function Mainpage() {
     <>
       {/* NAVBAR */}
       <header className="ml-header">
-        <div className="ml-logo">Foto Video Rodríguez</div>
-
+      
+        <img src=".\public\96919ec3-2b35-4e8c-b4cb-ab67f08d736d.jpg" alt="s"  style={{ width: "140px", height: "auto" }} />
         <input
           className="ml-search"
           placeholder="Buscar productos, marcas..."

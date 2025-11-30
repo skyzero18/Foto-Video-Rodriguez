@@ -1,6 +1,12 @@
+/* ---------- Reset ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 /* NAVBAR */
 .ml-header {
-  background: #008332;
+  background: #FDEF14;
   padding: 15px;
   display: flex;
   align-items: center;
