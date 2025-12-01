@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import styles from "./AdminPage.module.css";
 import { useParams, useNavigate } from "react-router-dom";
-import { AuthContext } from "../Context/AuthContext";
+import { AuthContext } from "../context2/AuthContext";
 
 function AdminPanel() {
    
@@ -509,18 +509,13 @@ function AdminPanel() {
               <h3 style={{ margin: "10px 0" }}>Productos</h3>
               {factura.productos.map((prod, index) => (
                 <div key={index} style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
-                  <select
+                  <input
+                    type="text"
+                    placeholder="ID del producto"
                     value={prod.productoId}
                     onChange={(e) => actualizarProductoFactura(index, "productoId", e.target.value)}
                     style={{ flex: 2 }}
-                  >
-                    <option value="">Seleccionar producto</option>
-                    {productos.map((p) => (
-                      <option key={p._id} value={p._id}>
-                        {p.Nombre} - ${p.Precio}
-                      </option>
-                    ))}
-                  </select>
+                  />
                   
                   <input
                     type="number"

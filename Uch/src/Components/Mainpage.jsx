@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import styles from "./Mainpage.module.css";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../Context/AuthContext";
+import { AuthContext } from "../context2/AuthContext";
 
 function Mainpage() {
   const [categoria, setCategoria] = useState("todas");

@@ -1,7 +1,7 @@
 import { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./Login.module.css";
-import { AuthContext } from "../Context/AuthContext";
+import { AuthContext } from "../context2/AuthContext";
 
 function LoginPage() {
   const [mostrarRegistro, setMostrarRegistro] = useState(false);
