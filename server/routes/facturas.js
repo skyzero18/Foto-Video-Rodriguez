@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose");
 const Factura = require("../Models/Factura");
 const Producto = require("../Models/Product");
 
@@ -17,59 +18,104 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Crear factura
+// Crear factura (múltiples productos) con validación de stock y descuento SIN transacción
 router.post("/", async (req, res) => {
   try {
-    console.log("📝 Creando factura con datos:", req.body);
-    const { productos: productosIds, ...otrosDatos } = req.body;
+    const items = req.body.productos;
 
-    if (!productosIds || !Array.isArray(productosIds) || productosIds.length === 0) {
+    if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ ok: false, error: "Se requiere al menos un producto" });
     }
 
-    // Procesar cada producto
-    const productosFactura = [];
-    let montoTotal = 0;
+    // Normaliza cantidades
+    const solicitados = items.map(it => ({
+      productoId: it.productoId,
+      cantidad: Math.max(1, parseInt(it.cantidad || 1))
+    }));
 
-    for (const item of productosIds) {
-      const producto = await Producto.findById(item.productoId);
-      if (!producto) {
-        return res.status(404).json({ ok: false, error: `Producto ${item.productoId} no encontrado` });
+    // Traer productos
+    const ids = solicitados.map(i => i.productoId);
+    const productosDb = await Producto.find({ _id: { $in: ids } });
+    const mapProd = new Map(productosDb.map(p => [String(p._id), p]));
+
+    // Validaciones de existencia/estado/stock
+    const faltantes = [];
+    for (const it of solicitados) {
+      const p = mapProd.get(String(it.productoId));
+      if (!p) {
+        faltantes.push({ productoId: it.productoId, motivo: "No existe" });
+        continue;
       }
-
-      const cantidad = item.cantidad || 1;
-      const subtotal = producto.Precio * cantidad;
-
-      productosFactura.push({
-        productoId: producto._id,
-        nombre: producto.Nombre,
-        cantidad: cantidad,
-        precioUnitario: producto.Precio,
-        subtotal: subtotal
-      });
-
-      montoTotal += subtotal;
+      const disponible = typeof p.Stock === "number" ? p.Stock : 0;
+      if (p.Activo === false) {
+        faltantes.push({ productoId: p._id, nombre: p.Nombre, motivo: "Inactivo" });
+      } else if (disponible < it.cantidad) {
+        faltantes.push({
+          productoId: p._id,
+          nombre: p.Nombre,
+          solicitado: it.cantidad,
+          disponible
+        });
+      }
+    }
+    if (faltantes.length) {
+      return res.status(400).json({ ok: false, error: "Stock insuficiente", faltantes });
     }
 
-    const fechaActual = new Date();
-    console.log("🕒 Fecha actual que se guardará:", fechaActual);
+    // Descuento de stock con verificación atómica por ítem y rollback si falla alguno
+    const decrementados = [];
+    for (const it of solicitados) {
+      const upd = await Producto.updateOne(
+        { _id: it.productoId, Stock: { $gte: it.cantidad } }, // condición
+        { $inc: { Stock: -it.cantidad } }
+      );
+      if (!upd.modifiedCount) {
+        // rollback de lo ya descontado
+        for (const done of decrementados) {
+          await Producto.updateOne({ _id: done.productoId }, { $inc: { Stock: done.cantidad } });
+        }
+        const p = mapProd.get(String(it.productoId));
+        return res.status(409).json({
+          ok: false,
+          error: `Stock insuficiente durante actualización${p ? ` para ${p.Nombre}` : ""}`,
+          code: "STOCK_RACE"
+        });
+      }
+      decrementados.push(it);
+    }
 
+    // Construir detalle y total
+    let productosFactura = [];
+    let total = 0;
+    for (const it of solicitados) {
+      const p = mapProd.get(String(it.productoId));
+      const precio = Number(p.Precio) || 0;
+      const subtotal = precio * it.cantidad;
+      total += subtotal;
+      productosFactura.push({
+        productoId: p._id,
+        nombre: p.Nombre,
+        cantidad: it.cantidad,
+        precioUnitario: precio,
+        subtotal
+      });
+    }
+
+    // Guardar factura
     const factura = new Factura({
       "Nombre y apellido": req.body["Nombre y apellido"],
       "Direccion": req.body["Direccion"],
       "Metodo de pago": req.body["Metodo de pago"],
       productos: productosFactura,
-      "Monto": montoTotal,
-      fecha: fechaActual
+      "Monto": total,
+      fecha: new Date()
     });
 
-    console.log("💾 Factura antes de guardar:", JSON.stringify(factura, null, 2));
-    await factura.save();
-    console.log("✅ Factura guardada exitosamente:", JSON.stringify(factura, null, 2));
-    res.json({ ok: true, factura });
+    const guardada = await factura.save();
+    return res.status(201).json({ ok: true, factura: guardada });
   } catch (err) {
     console.error("❌ Error en POST /facturas:", err);
-    res.status(500).json({ ok: false, error: "Error al crear la factura" });
+    return res.status(500).json({ ok: false, error: "Error al crear la factura" });
   }
 });
 

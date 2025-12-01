@@ -64,19 +64,41 @@ function AdminPanel() {
   };
 
   const crearFactura = async () => {
-    const facturaData = {
-      "Nombre y apellido": factura.nombre,
-      "Direccion": factura.direccion,
-      "Metodo de pago": factura.metodoPago,
-      productos: factura.productos
-    };
-    
-    await fetch("http://localhost:4000/facturas", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(facturaData)
-    });
-    alert("Factura creada");
+    try {
+      const facturaData = {
+        "Nombre y apellido": factura.nombre,
+        "Direccion": factura.direccion,
+        "Metodo de pago": factura.metodoPago,
+        productos: factura.productos
+      };
+
+      const resp = await fetch("http://localhost:4000/facturas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(facturaData),
+      });
+
+      const data = await resp.json();
+
+      if (!resp.ok || !data.ok) {
+        if (data?.faltantes?.length) {
+          const detalle = data.faltantes
+            .map(f => `- ${f.nombre || f.productoId}: solicitado ${f.solicitado ?? "?"}, disponible ${f.disponible ?? "0"}${f.motivo ? ` (${f.motivo})` : ""}`)
+            .join("\n");
+          alert(`No se puede completar la compra por stock insuficiente:\n${detalle}`);
+        } else {
+          alert(data?.error || "Error al crear la factura");
+        }
+        return;
+      }
+
+      alert("Factura creada correctamente");
+      // Opcional: limpiar formulario
+      // setFactura({ nombre:"", direccion:"", metodoPago:"", productos:[{ productoId:"", cantidad:1 }], monto:"" });
+    } catch (e) {
+      console.error(e);
+      alert("Error de red al crear la factura");
+    }
   };
     
     const cargarCategorias = async () => {
