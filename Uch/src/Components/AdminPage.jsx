@@ -438,15 +438,8 @@ function AdminPanel() {
 
             {entidad === "producto" && (
               <div>
-                {(accion === "crear" || accion === "editar") && (
+                {accion === "crear" && (
                   <div>
-                    <input
-                      type="text"
-                      placeholder="ID del producto"
-                      value={productoId}
-                      onChange={(e) => setProductoId(e.target.value)}
-                    />
-
                     <input name="Nombre" placeholder="Nombre" value={form.Nombre} onChange={actualizarForm} />
                     <input name="Descripcion" placeholder="Descripción" value={form.Descripcion} onChange={actualizarForm} />
                     <input name="Precio" type="number" placeholder="Precio" value={form.Precio} onChange={actualizarForm} />
@@ -471,11 +464,56 @@ function AdminPanel() {
                   </div>
                 )}
 
-                <br />
+                {accion === "editar" && (
+                  <div>
+                    <label>ID del producto a editar</label>
+                    <input
+                      type="text"
+                      placeholder="ID del producto"
+                      value={productoId}
+                      onChange={(e) => setProductoId(e.target.value)}
+                    />
+
+                    <input name="Nombre" placeholder="Nombre" value={form.Nombre} onChange={actualizarForm} />
+                    <input name="Descripcion" placeholder="Descripción" value={form.Descripcion} onChange={actualizarForm} />
+                    <input name="Precio" type="number" placeholder="Precio" value={form.Precio} onChange={actualizarForm} />
+
+                    <select name="Categoria" value={form.Categoria} onChange={actualizarForm}>
+                      <option value="">Seleccionar categoría</option>
+                      {categorias.map((cat) => (
+                        <option key={cat._id} value={cat._1}>
+                          {cat.Nombre}
+                        </option>
+                      ))}
+                    </select>
+
+                    <input name="Imagen" placeholder="URL de imagen" value={form.Imagen} onChange={actualizarForm} />
+                    <input
+                      type="number"
+                      placeholder="Stock"
+                      name="Stock"
+                      value={form.Stock || ""}
+                      onChange={actualizarForm}
+                    />
+                  </div>
+                )}
+
+                {accion === "borrar" && (
+                  <div>
+                    <label>ID del producto a desactivar</label>
+                    <input
+                      type="text"
+                      placeholder="ID del producto"
+                      value={productoId}
+                      onChange={(e) => setProductoId(e.target.value)}
+                    />
+                  </div>
+                )}
+                 <br />
 
                 {accion === "crear" && <button onClick={agregarProducto}>Agregar producto</button>}
                 {accion === "editar" && <button onClick={editarProducto}>Editar producto</button>}
-                {accion === "borrar" && <button onClick={desactivarProducto}>Eliminar producto</button>}
+                {accion === "borrar" && <button onClick={desactivarProducto}>Desactivar producto</button>}
               </div>
             )}
           </div>
@@ -530,7 +568,22 @@ function AdminPanel() {
                     <button
                       type="button"
                       onClick={() => eliminarProductoFactura(index)}
-                      style={{ background: "#d32f2f", color: "white", border: "none", padding: "8px 12px", borderRadius: "4px", cursor: "pointer" }}
+                      aria-label={`Eliminar producto ${index + 1}`}
+                      style={{
+                        background: "#d32f2f",
+                        color: "white",
+                        border: "none",
+                        padding: "0",            // eliminar padding grande
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        fontSize: "14px",       // tamaño de fuente más pequeño
+                        lineHeight: 1,
+                        width: "28px",          // ancho fijo pequeño
+                        height: "28px",         // alto fijo pequeño
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center"
+                      }}
                     >
                       ✕
                     </button>
@@ -541,13 +594,13 @@ function AdminPanel() {
               <button
                 type="button"
                 onClick={agregarProductoFactura}
-                style={{ marginTop: "8px", background: "#4CAF50", color: "white", border: "none", padding: "8px 16px", borderRadius: "4px", cursor: "pointer" }}
+                style={{ marginTop: "8px", marginBottom: "12px", background: "#4CAF50", color: "white", border: "none", padding: "8px 16px", borderRadius: "4px", cursor: "pointer" }}
               >
                 + Agregar Producto
               </button>
-
-              <br />
-              <button onClick={crearFactura}>Generar Factura</button>
+               
+               <br />
+               <button onClick={crearFactura}>Generar Factura</button>
             </div>
 
             {/* Nuevo div decorativo: filtrado por fecha (día / mes / año) */}
@@ -662,7 +715,7 @@ function AdminPanel() {
                     </div>
                   </div>
                 ))
-              )}
+)              }
             </div>
             <div className={styles["pagination"]}>
               <button

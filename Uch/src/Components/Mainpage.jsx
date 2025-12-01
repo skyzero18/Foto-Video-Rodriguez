@@ -211,8 +211,9 @@ function Mainpage() {
               </div>
 
               {/* INFO DEL PRODUCTO */}
-              <div className={styles["ml-card-info"]}>
+               <div className={styles["ml-card-info"]}>
                 <h3>{p.Nombre}</h3>
+               <small style={{ display: "block", color: "#666", fontSize: "12px", marginBottom: 6 }}>ID: {p._id}</small>
                 <p>{p.Descripcion}</p>
                 <span className={styles["ml-category"]}>{p.CategoriaNombre}</span>
                 <p>Stock: {p.Stock}</p>
