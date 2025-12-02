@@ -25,10 +25,18 @@ function buildLogPayloadFrom(req, base = {}) {
   return doc;
 }
 
+/**
+ * Crea un log simple usando los campos base (Producto, Accion).
+ * No incluye información de usuario.
+ */
 async function createLogFromReq(req, base = {}) {
   try {
-    const payload = buildLogPayloadFrom(req, base);
-    console.debug("LOGHELPER - creating log payload:", payload);
+    const payload = {
+      Producto: base.Producto ?? "",
+      Accion: base.Accion ?? "",
+      Fecha: base.Fecha ?? undefined
+    };
+    console.debug("LOGHELPER - creating log payload (no user):", payload);
     const nuevo = await Log.create(payload);
     return nuevo;
   } catch (err) {

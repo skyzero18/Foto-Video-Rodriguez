@@ -17,6 +17,9 @@ function AdminPanel() {
     Imagen: "",
     Stock: 0
   });
+
+  // nombre usado al crear/editar categorías en el panel
+  const [nuevoNombreCategoria, setNuevoNombreCategoria] = useState("");
   
   // actualizar campo del form garantizando valores definidos
   const actualizarForm = (e) => {
