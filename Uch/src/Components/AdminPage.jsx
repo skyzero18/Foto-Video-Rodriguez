@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext } from "react";
+import { useLocation } from "react-router-dom";
 import styles from "./AdminPage.module.css";
 import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context2/AuthContext";
@@ -8,6 +9,7 @@ function AdminPanel() {
   const [accion, setAccion] = useState("crear");
   const [entidad, setEntidad] = useState("producto");
   const { id } = useParams();
+  const location = useLocation();
   const { logout, usuario } = useContext(AuthContext);
   const [form, setForm] = useState({
     Nombre: "",
@@ -26,7 +28,8 @@ function AdminPanel() {
     const name = e.target.name;
     let value = e.target.value;
     if (name === "Stock") {
-      value = Number(value || 0);
+      // si borran el input dejamos "" -> significa "no cambiar" en edición parcial
+      value = value === "" ? "" : Number(value);
     }
     setForm(prev => ({ ...prev, [name]: value }));
   };
@@ -81,31 +84,53 @@ function AdminPanel() {
   const [mostrarModal, setMostrarModal] = useState(false);
 
   // si viene id por params (Main -> Admin) pre-seleccionar para editar y cargar datos
+  const [originalProduct, setOriginalProduct] = useState(null);
+
   useEffect(() => {
-    if (id) {
-      setEntidad("producto");
-      setAccion("editar");
+    if (!id) return;
+    const stateProduct = location.state?.producto || location.state?.product || null;
+    const applyProduct = (prod) => {
+      if (!prod) return;
+      // Normalizar categoria: puede venir como objeto o id
+      let categoriaVal = "";
+      if (prod.Categoria) {
+        categoriaVal = typeof prod.Categoria === "object" ? (prod.Categoria._id || prod.Categoria.id || "") : String(prod.Categoria);
+      } else if (prod.categoria) {
+        categoriaVal = typeof prod.categoria === "object" ? (prod.categoria._id || prod.categoria.id || "") : String(prod.categoria);
+      } else if (prod.categoriaId) {
+        categoriaVal = String(prod.categoriaId);
+      }
+      // Normalizar stock a número (si no viene, usar 0)
+      const stockVal = (typeof prod.Stock !== "undefined" ? prod.Stock : (typeof prod.stock !== "undefined" ? prod.stock : 0));
+      setOriginalProduct(prod);
+      setForm({
+        Nombre: prod.Nombre ?? prod.nombre ?? "",
+        Descripcion: prod.Descripcion ?? prod.descripcion ?? "",
+        Precio: prod.Precio ?? prod.precio ?? "",
+        Categoria: categoriaVal ?? "",
+        Imagen: prod.Imagen ?? prod.imagen ?? "",
+        Stock: Number(isNaN(Number(stockVal)) ? 0 : Number(stockVal))
+      });
       setProductoId(id);
-      (async () => {
-        try {
-          console.debug("FRONT DEBUG - cargando producto para editar id:", id);
-          const res = await fetch(`http://localhost:4000/productos/${id}`);
-          const p = await res.json();
-          // adaptarse a la forma que devuelve el backend (p puede ser { _id, Nombre, ... } )
-          setForm({
-            Nombre: p.Nombre ?? p.nombre ?? "",
-            Descripcion: p.Descripcion ?? p.descripcion ?? "",
-            Precio: p.Precio ?? p.precio ?? "",
-            Categoria: p.Categoria ?? p.categoria ?? "",
-            Imagen: p.Imagen ?? p.imagen ?? "",
-            Stock: p.Stock ?? p.stock ?? 0
-          });
-        } catch (e) {
-          console.error("FRONT DEBUG - error cargando producto:", e);
-        }
-      })();
+      setAccion("editar");
+      setEntidad("producto");
+    };
+
+    if (stateProduct) {
+      applyProduct(stateProduct);
+      return;
     }
-  }, [id]);
+    (async () => {
+      try {
+        const res = await fetch(`http://localhost:4000/productos/${id}`);
+        const p = await res.json();
+        const prod = p.producto ?? p;
+        applyProduct(prod);
+      } catch (e) {
+        console.error("Error cargando producto para editar:", e);
+      }
+    })();
+  }, [id, location.state]);
 
   // Agregar producto a la factura
   const agregarProductoFactura = () => {
@@ -545,7 +570,7 @@ function AdminPanel() {
                       type="number"
                       placeholder="Stock"
                       name="Stock"
-                      value={form.Stock ?? 0}
+                      value={typeof form.Stock === "number" ? form.Stock : (form.Stock ?? "")}
                       onChange={actualizarForm}
                     />
                   </div>
@@ -579,7 +604,7 @@ function AdminPanel() {
                       type="number"
                       placeholder="Stock"
                       name="Stock"
-                      value={form.Stock ?? 0}
+                      value={typeof form.Stock === "number" ? form.Stock : (form.Stock ?? "")}
                       onChange={actualizarForm}
                     />
                   </div>
