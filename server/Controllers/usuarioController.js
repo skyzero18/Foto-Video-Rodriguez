@@ -1,6 +1,8 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const Usuario = require("../Models/Usuario");
+const Log = require("../Models/Log");
+const { createLogFromReq } = require("../utils/logHelper");
 
 
 const registrarUsuario = async (req, res) => {
@@ -27,6 +29,18 @@ const registrarUsuario = async (req, res) => {
     });
 
     await nuevoUsuario.save();
+
+    // Log: usuario creado (en campo Producto guardo el id del usuario creado)
+    try {
+      await createLogFromReq(req, {
+        Accion: `Usuario creado: ${nuevoUsuario.Nombre || nuevoUsuario.email || nuevoUsuario._id}`,
+        Producto: nuevoUsuario._id?.toString() || ""
+      });
+      console.debug("USUARIO CONTROLLER - log creado para usuario:", nuevoUsuario._id?.toString());
+    } catch (logErr) {
+      console.error("USUARIO CONTROLLER - fallo al crear log:", logErr);
+    }
+
     res.json({ msg: "Usuario registrado correctamente" });
 
   } catch (err) {
