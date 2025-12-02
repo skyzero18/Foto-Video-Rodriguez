@@ -8,6 +8,52 @@ function AdminPanel() {
   const [accion, setAccion] = useState("crear");
   const [entidad, setEntidad] = useState("producto");
   const { id } = useParams();
+  const { logout, usuario } = useContext(AuthContext);
+  const [form, setForm] = useState({
+    Nombre: "",
+    Descripcion: "",
+    Precio: "",
+    Categoria: "",
+    Imagen: "",
+    Stock: 0
+  });
+  
+  // actualizar campo del form garantizando valores definidos
+  const actualizarForm = (e) => {
+    const name = e.target.name;
+    let value = e.target.value;
+    if (name === "Stock") {
+      value = Number(value || 0);
+    }
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  // enviar log al backend con el nombre de usuario (data.usuario.Nombre)
+  const crearLog = async ({ Accion = "", Producto = "" }) => {
+    try {
+      const nombreUsuario =
+        usuario?.Nombre ||
+        (() => {
+          try {
+            const raw = localStorage.getItem("usuario");
+            return raw ? JSON.parse(raw)?.Nombre : null;
+          } catch (e) {
+            return null;
+          }
+        })() ||
+        "sin-nombre";
+
+      console.debug("FRONT LOG -> Enviando log:", { Usuario: nombreUsuario, Accion, Producto });
+
+      await fetch("http://localhost:4000/logs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ Accion, Producto, Usuario: nombreUsuario })
+      });
+    } catch (err) {
+      console.error("Error enviando log:", err);
+    }
+  };
 
   const [categorias, setCategorias] = useState([]);
   const [productos, setProductos] = useState([]);
@@ -15,15 +61,6 @@ function AdminPanel() {
   const [categoriaId, setCategoriaId] = useState("");
   const [productoId, setProductoId] = useState("");
 
-  const [form, setForm] = useState({
-    Nombre: "",
-    Descripcion: "",
-    Precio: "",
-    Categoria: "",
-    Imagen: ""
-  });
-
-  const [nuevoNombreCategoria, setNuevoNombreCategoria] = useState("");
   const [factura, setFactura] = useState({
     nombre: "",
     direccion: "",
@@ -40,7 +77,32 @@ function AdminPanel() {
   const [facturaSeleccionada, setFacturaSeleccionada] = useState(null);
   const [mostrarModal, setMostrarModal] = useState(false);
 
-  const { logout } = useContext(AuthContext);
+  // si viene id por params (Main -> Admin) pre-seleccionar para editar y cargar datos
+  useEffect(() => {
+    if (id) {
+      setEntidad("producto");
+      setAccion("editar");
+      setProductoId(id);
+      (async () => {
+        try {
+          console.debug("FRONT DEBUG - cargando producto para editar id:", id);
+          const res = await fetch(`http://localhost:4000/productos/${id}`);
+          const p = await res.json();
+          // adaptarse a la forma que devuelve el backend (p puede ser { _id, Nombre, ... } )
+          setForm({
+            Nombre: p.Nombre ?? p.nombre ?? "",
+            Descripcion: p.Descripcion ?? p.descripcion ?? "",
+            Precio: p.Precio ?? p.precio ?? "",
+            Categoria: p.Categoria ?? p.categoria ?? "",
+            Imagen: p.Imagen ?? p.imagen ?? "",
+            Stock: p.Stock ?? p.stock ?? 0
+          });
+        } catch (e) {
+          console.error("FRONT DEBUG - error cargando producto:", e);
+        }
+      })();
+    }
+  }, [id]);
 
   // Agregar producto a la factura
   const agregarProductoFactura = () => {
@@ -137,43 +199,65 @@ function AdminPanel() {
     cargarLogs(1);
   }, []);
 
-    const actualizarForm = (e) => {
-      setForm({ ...form, [e.target.name]: e.target.value });
-    };
-
     // ============================================================
     // ==================== PRODUCTOS =============================
     // ============================================================
 
     const agregarProducto = async () => {
-      await fetch("http://localhost:4000/productos", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nombre: form.Nombre,
-          descripcion: form.Descripcion,
-          precio: form.Precio,
-          categoria: form.Categoria,
-          imagen: form.Imagen,
-        }),
-      });
-
-      alert("Producto creado");
-      cargarProductos();
+      try {
+        const payload = {
+          Nombre: form.Nombre,
+          Descripcion: form.Descripcion,
+          Precio: form.Precio,
+          Categoria: form.Categoria,
+          Imagen: form.Imagen,
+          Stock: Number(form.Stock || 0),
+          usuarios: usuario?._id ?? null
+        };
+        console.debug("FRONT DEBUG - AGREGAR PRODUCTO payload:", payload);
+        const res = await fetch("http://localhost:4000/productos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json().catch(() => ({}));
+        alert("Producto creado");
+        cargarProductos();
+        crearLog({ Accion: "Crear producto", Producto: form.Nombre });
+      } catch (err) {
+        console.error("Error agregarProducto:", err);
+        alert("Error de red al crear producto");
+      }
     };
-
+ 
     const editarProducto = async () => {
       if (!productoId) return alert("Seleccione un producto");
-
-      await fetch(`http://localhost:4000/productos/${productoId}`, {
-        method: "PATCH", // ← Cambiar de PUT a PATCH
+ 
+     try {
+      const payload = {
+        Nombre: form.Nombre,
+        Descripcion: form.Descripcion,
+        Precio: form.Precio,
+        Categoria: form.Categoria,
+        Imagen: form.Imagen,
+        Stock: Number(form.Stock || 0),
+        usuarios: usuario?._id ?? null
+      };
+      console.debug("FRONT DEBUG - EDITAR PRODUCTO payload:", payload);
+      const res = await fetch(`http://localhost:4000/productos/${productoId}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
-
+      await res.json().catch(() => ({}));
       alert("Producto editado");
       cargarProductos();
-    };
+      crearLog({ Accion: "Editar producto", Producto: productoId || form.Nombre });
+    } catch (err) {
+      console.error("Error editarProducto:", err);
+      alert("Error de red al editar producto");
+    }
+   };
 
     const desactivarProducto = async () => {
       if (!productoId) return alert("Seleccione un producto");
@@ -440,11 +524,11 @@ function AdminPanel() {
               <div>
                 {accion === "crear" && (
                   <div>
-                    <input name="Nombre" placeholder="Nombre" value={form.Nombre} onChange={actualizarForm} />
-                    <input name="Descripcion" placeholder="Descripción" value={form.Descripcion} onChange={actualizarForm} />
-                    <input name="Precio" type="number" placeholder="Precio" value={form.Precio} onChange={actualizarForm} />
+                    <input name="Nombre" placeholder="Nombre" value={form.Nombre ?? ""} onChange={actualizarForm} />
+                    <input name="Descripcion" placeholder="Descripción" value={form.Descripcion ?? ""} onChange={actualizarForm} />
+                    <input name="Precio" type="number" placeholder="Precio" value={form.Precio ?? ""} onChange={actualizarForm} />
 
-                    <select name="Categoria" value={form.Categoria} onChange={actualizarForm}>
+                    <select name="Categoria" value={form.Categoria ?? ""} onChange={actualizarForm}>
                       <option value="">Seleccionar categoría</option>
                       {categorias.map((cat) => (
                         <option key={cat._id} value={cat._id}>
@@ -453,12 +537,12 @@ function AdminPanel() {
                       ))}
                     </select>
 
-                    <input name="Imagen" placeholder="URL de imagen" value={form.Imagen} onChange={actualizarForm} />
+                    <input name="Imagen" placeholder="URL de imagen" value={form.Imagen ?? ""} onChange={actualizarForm} />
                     <input
                       type="number"
                       placeholder="Stock"
                       name="Stock"
-                      value={form.Stock || ""}
+                      value={form.Stock ?? 0}
                       onChange={actualizarForm}
                     />
                   </div>
@@ -474,11 +558,11 @@ function AdminPanel() {
                       onChange={(e) => setProductoId(e.target.value)}
                     />
 
-                    <input name="Nombre" placeholder="Nombre" value={form.Nombre} onChange={actualizarForm} />
-                    <input name="Descripcion" placeholder="Descripción" value={form.Descripcion} onChange={actualizarForm} />
-                    <input name="Precio" type="number" placeholder="Precio" value={form.Precio} onChange={actualizarForm} />
+                    <input name="Nombre" placeholder="Nombre" value={form.Nombre ?? ""} onChange={actualizarForm} />
+                    <input name="Descripcion" placeholder="Descripción" value={form.Descripcion ?? ""} onChange={actualizarForm} />
+                    <input name="Precio" type="number" placeholder="Precio" value={form.Precio ?? ""} onChange={actualizarForm} />
 
-                    <select name="Categoria" value={form.Categoria} onChange={actualizarForm}>
+                    <select name="Categoria" value={form.Categoria ?? ""} onChange={actualizarForm}>
                       <option value="">Seleccionar categoría</option>
                       {categorias.map((cat) => (
                         <option key={cat._id} value={cat._1}>
@@ -487,12 +571,12 @@ function AdminPanel() {
                       ))}
                     </select>
 
-                    <input name="Imagen" placeholder="URL de imagen" value={form.Imagen} onChange={actualizarForm} />
+                    <input name="Imagen" placeholder="URL de imagen" value={form.Imagen ?? ""} onChange={actualizarForm} />
                     <input
                       type="number"
                       placeholder="Stock"
                       name="Stock"
-                      value={form.Stock || ""}
+                      value={form.Stock ?? 0}
                       onChange={actualizarForm}
                     />
                   </div>

@@ -1,6 +1,7 @@
 const express = require("express");
 const Producto = require("../Models/Product");
 const Log = require("../Models/Log");
+const { createLogFromReq } = require("../utils/logHelper");
 const router = express.Router();
 
 // OBTENER TODOS
@@ -42,11 +43,14 @@ router.post("/", async (req, res) => {
       Activo: true
     });
 
-    await Log.create({
-      Usuario: "admin",
-      Producto: nuevo._id.toString(),
-      Accion: `Producto creado: ${nuevo.Nombre}`
-    });
+    try {
+      await createLogFromReq(req, {
+        Producto: nuevo._id.toString(),
+        Accion: `Producto creado: ${nuevo.Nombre}`
+      });
+    } catch (logErr) {
+      console.error("Error creando log (producto crear):", logErr);
+    }
 
     res.json({ ok: true, producto: nuevo });
 
@@ -59,8 +63,24 @@ router.post("/", async (req, res) => {
 // EDITAR PRODUCTO + LOG
 router.patch("/:id", async (req, res) => {
   try {
-    const producto = await Producto.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    // normalizar posible payload de stock (Stock o stock) y forzar Number
+    const updateData = { ...req.body };
+    if (Object.prototype.hasOwnProperty.call(req.body, "Stock") || Object.prototype.hasOwnProperty.call(req.body, "stock")) {
+      const sval = req.body.Stock ?? req.body.stock;
+      updateData.Stock = Number(sval);
+    }
+    const producto = await Producto.findByIdAndUpdate(req.params.id, updateData, { new: true });
+
     if (!producto) return res.status(404).json({ error: "Producto no encontrado" });
+    // crear log de edición / desactivación
+    try {
+      await createLogFromReq(req, {
+        Producto: producto._id.toString(),
+        Accion: (req.body.Activo === false) ? `Producto desactivado: ${producto.Nombre}` : `Producto editado: ${producto.Nombre}`
+      });
+    } catch (logErr) {
+      console.error("Error creando log (producto editar):", logErr);
+    }
     res.json(producto);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -82,12 +102,14 @@ router.patch("/:id/stock", async (req, res) => {
       return res.status(404).json({ ok: false, error: "Producto no encontrado" });
     }
 
-    // LOG
-    await Log.create({
-      Usuario: "admin",
-      Producto: actualizado._id.toString(),
-      Accion: `Stock actualizado a ${Stock} para ${actualizado.Nombre}`
-    });
+    try {
+      await createLogFromReq(req, {
+        Producto: actualizado._id.toString(),
+        Accion: `Stock actualizado a ${Stock} para ${actualizado.Nombre}`
+      });
+    } catch (logErr) {
+      console.error("Error creando log (stock):", logErr);
+    }
 
     res.json({ ok: true, producto: actualizado });
 
@@ -106,12 +128,14 @@ router.delete("/:id", async (req, res) => {
       return res.status(404).json({ ok: false, error: "Producto no encontrado" });
     }
 
-    // LOG
-    await Log.create({
-      Usuario: "admin",
-      Producto: eliminado._id.toString(),
-      Accion: `Producto eliminado: ${eliminado.Nombre}`
-    });
+    try {
+      await createLogFromReq(req, {
+        Producto: eliminado._id.toString(),
+        Accion: `Producto eliminado: ${eliminado.Nombre}`
+      });
+    } catch (logErr) {
+      console.error("Error creando log (delete):", logErr);
+    }
 
     res.json({ ok: true, mensaje: `Producto eliminado: ${eliminado.Nombre}` });
 
