@@ -219,7 +219,8 @@ function AdminPanel() {
             Descripcion: producto.Descripcion,
             Precio: producto.Precio,
             Categoria: producto.Categoria,
-            Imagen: producto.Imagen
+            Imagen: producto.Imagen,
+            Stock: producto.Stock ?? 0 
           });
         }
       }
@@ -593,7 +594,8 @@ function AdminPanel() {
                     <select name="Categoria" value={form.Categoria ?? ""} onChange={actualizarForm}>
                       <option value="">Seleccionar categoría</option>
                       {categorias.map((cat) => (
-                        <option key={cat._id} value={cat._1}>
+                        <option key={cat._id} value={cat._id}>
+
                           {cat.Nombre}
                         </option>
                       ))}
